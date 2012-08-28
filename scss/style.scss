@@ -1,0 +1,50 @@
+/* Welcome to Compass.
+ * In this file you should write your main styles. (or centralize your imports)
+ * Import this file using the following HTML or equivalent:
+ * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
+
+@import "compass/reset";
+@import "helpers";
+
+body {
+  background: #333;
+  padding: 40px;
+}
+
+#canvas {
+  width: 484px;
+  height: 593px;
+  background: url(../img/bg.png);
+  border: 1px solid #000;
+}
+
+circle {
+  stroke:1px;
+  opacity:.5;
+}
+
+circle.glow {
+  stroke:none;
+  opacity:.3;
+}
+
+path {
+  stroke:black;
+  stroke-width:0.3px;
+  fill:black;
+  opacity:.5;
+}
+
+.curve, .line {
+  fill: none;
+  stroke-width: 1px;
+}
+.curve {
+  stroke: red;
+  stroke-width: 3px;
+}
+.control {
+  fill: #ccc;
+  stroke: #000;
+  stroke-width: .5px;
+}
