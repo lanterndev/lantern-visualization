@@ -80,6 +80,9 @@ function addPoints() {
       if (d.ISO3136 == selectedISO) return "hollow";
       else return "glow";
     })
+    .style("opacity", function(d) {
+      return 0;
+    })
     .attr("filter", function(d) {
 
       if (d.ISO3136 == selectedISO) return "url(#lightBlur)"
@@ -95,6 +98,12 @@ function addPoints() {
     .attr('r',  function(d, i) {
       if (d.ISO3136 == selectedISO) return 6;
       else return 5;
+    })
+    .transition()
+    .duration(750)
+    .delay(function(d, i) { return i * (5 + Math.random()*10); })
+    .style("opacity", function(d) {
+      return .1;
     })
 
     map
@@ -116,6 +125,15 @@ function addPoints() {
     .attr('r',  function(d, i) {
       if (d.ISO3136 == selectedISO) return 2;
       else return .5;
+    })
+    .style("opacity", function(d) {
+      return 0;
+    })
+    .transition()
+    .duration(750)
+    .delay(function(d, i) { return i * (5 + Math.random()*10); })
+    .style("opacity", function(d) {
+      return .7;
     })
   });
 }
