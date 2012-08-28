@@ -23,6 +23,13 @@ circle {
   opacity:.5;
 }
 
+circle.hollow {
+  stroke:#FF6666;
+  stroke-width:2px;
+  fill:none;
+  opacity:.7;
+}
+
 circle.glow {
   stroke:none;
   opacity:.3;

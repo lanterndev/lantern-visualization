@@ -9,6 +9,7 @@ function drawP(svg, p1, p2) {
   line    = d3.svg.line().x(function(d) { return d.x; } ).y(function(d) { return d.y; } ),
   orders  = d3.range(3, 4);
 
+
   var
   vis = svg
   .data(orders)
@@ -64,6 +65,8 @@ function drawP(svg, p1, p2) {
 
 function start() {
 
+  selectedISO = 'BR';
+
   var projection = d3.geo.mercator()
   .scale(500)
   .translate([240, 300]);
@@ -102,15 +105,23 @@ function start() {
       .data(json)
       .enter()
       .append("circle")
-      .attr("class", "glow")
-      .attr("filter", "url(#blur)")
+      .attr("class", function(d) {
+        if (d.ISO3136 == selectedISO) return "hollow";
+        else return "glow";
+      })
+      .attr("filter", function(d) {
+        return "url(#blur)"
+      })
       .attr("fill", function(d) {
-        if (d.ISO3136 == 'BR') return "red";
+        if (d.ISO3136 == selectedISO) return "#FF6666";
         else return "#fff";
       })
       .attr('cx', function(d, i) { return projection([d.LONG, d.LAT])[0]; } )
       .attr('cy', function(d, i) { return projection([d.LONG, d.LAT])[1]; } )
-      .attr('r',  function(d, i) { return 5; })
+      .attr('r',  function(d, i) {
+        if (d.ISO3136 == selectedISO) return 6;
+        else return 5;
+      })
 
       map
       .append("g")
@@ -119,13 +130,19 @@ function start() {
       .enter()
       .append("circle")
       .attr("filter", "url(#blur2)")
+      .attr("stroke", function(d) {
+        if (d.ISO3136 == selectedISO) return "#FF6666";
+      })
       .attr("fill", function(d) {
-        if (d.ISO3136 == 'BR') return "red";
+        if (d.ISO3136 == selectedISO) return "none";
         else return "#fff";
       })
       .attr('cx', function(d, i) { return projection([d.LONG, d.LAT])[0]; } )
       .attr('cy', function(d, i) { return projection([d.LONG, d.LAT])[1]; } )
-      .attr('r',  function(d, i) { return 1; } )
+      .attr('r',  function(d, i) {
+        if (d.ISO3136 == selectedISO) return 2;
+        else return 1;
+      })
     });
 
 
