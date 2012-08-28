@@ -63,6 +63,11 @@ path {
     @include size(484px, 410px); // <-- Artificially cropping the map
   }
 
+  header {
+    @include position(41px, false, false, 18px);
+    @include size(484px, 51px);
+    background: url(../img/bg-chrome-header.png) no-repeat;
+  }
   footer {
     @include position(false, false, 18px, 18px);
     @include size(484px, 59px);
