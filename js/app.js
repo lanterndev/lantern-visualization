@@ -77,8 +77,9 @@ function addPoints() {
     .enter()
     .append("circle")
     .attr("class", function(d) {
-      if (d.ISO3136 == selectedISO) return "hollow";
-      else return "glow";
+      //if (d.ISO3136 == selectedISO) return "hollow";
+      //else return "glow";
+      return "glow";
     })
     .style("opacity", function(d) {
       return 0;
@@ -126,9 +127,7 @@ function addPoints() {
       if (d.ISO3136 == selectedISO) return 2;
       else return .5;
     })
-    .style("opacity", function(d) {
-      return 0;
-    })
+    .style("opacity", function(d) { return 0; })
     .transition()
     .duration(750)
     .delay(function(d, i) { return i * (5 + Math.random()*10); })
@@ -172,7 +171,14 @@ function start() {
     .data(json.features)
     .enter()
     .append("path")
-    .attr("d", d3.geo.path().projection(projection));
+    .style("opacity", function(d) { return 0; })
+    .attr("d", d3.geo.path().projection(projection))
+    .transition()
+    .duration(500)
+    .delay(500)
+    .style("opacity", function(d) {
+      return .4;
+    })
 
     addPoints();
 
