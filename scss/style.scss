@@ -54,12 +54,18 @@ path {
 .chrome {
   position:relative;
   @include size(520px, 629px);
-  background: url(../img/chrome.png) no-repeat;
+  background: url(../img/bg-chrome.png) no-repeat;
   margin: auto;
   overflow:hidden;
 
   #canvas {
     @include position(123px, false, false, 18px);
     @include size(484px, 410px); // <-- Artificially cropping the map
+  }
+
+  footer {
+    @include position(false, false, 18px, 18px);
+    @include size(484px, 59px);
+    background: url(../img/bg-chrome-footer.png) no-repeat;
   }
 }
