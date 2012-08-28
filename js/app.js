@@ -86,7 +86,7 @@ function start() {
   var map = svg
   .append("g").attr("class", "map");
 
-  d3.json('world-countries.json', function(json) {
+  d3.json('data/countries.json', function(json) {
     map
     .selectAll("path")
     .data(json.features)
@@ -94,7 +94,7 @@ function start() {
     .append("path")
     .attr("d", d3.geo.path().projection(projection));
 
-    d3.csv('centroids.csv', function(json) {
+    d3.csv('data/centroids.csv', function(json) {
 
       map
       .append("g")
