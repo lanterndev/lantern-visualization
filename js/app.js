@@ -1,25 +1,21 @@
-function drawP(svg, p1, p2) {
+var
+starts = [],
+ends   = [];
+
+function drawParabola(p1, p2) {
 
   var
-  map,
-  svg,
-  projection,
-  p3      = { x: (p2.x - p1.x) / 2, y: 300 },
-  w       = 350,
-  h       = 200,
   delta   = .003,
-  points  = [p1, p3, p2],
+  points  = [{x:p1.x, y:p1.y}, {x:Math.abs(p1.x - p2.x)/2, y: Math.abs(p2.y - p1.y)/2 }, { x: p2.x, y: p2.y}],
   line    = d3.svg.line().x(function(d) { return d.x; } ).y(function(d) { return d.y; } ),
   orders  = d3.range(3, 4);
 
-
   var
-  vis = svg
+  vis = d3.select("#lines")
+  .selectAll("svg")
   .data(orders)
   .enter()
   .append("svg")
-  .attr("width",  w)
-  .attr("height", h)
   .append("g");
 
   vis.selectAll("path.curve")
@@ -27,7 +23,10 @@ function drawP(svg, p1, p2) {
   .enter()
   .append("path")
   .attr("class", "curve")
-  .attr("d", line);
+  .attr("d", line)
+    .attr("filter", function(d) {
+      return "url(#lightBlur)";
+    })
 
   function interpolate(d, p) {
     if (arguments.length < 2) p = t;
@@ -81,9 +80,9 @@ function addPoints() {
       //else return "glow";
       return "glow";
     })
-    .style("opacity", function(d) {
-      return 0;
-    })
+    //.style("opacity", function(d) {
+      //return 0;
+    //})
     .attr("filter", function(d) {
 
       if (d.ISO3136 == selectedISO) return "url(#lightBlur)"
@@ -94,18 +93,49 @@ function addPoints() {
       if (d.ISO3136 == selectedISO) return "#FF6666";
       else return "#fff";
     })
-    .attr('cx', function(d, i) { return projection([d.LONG, d.LAT])[0]; } )
-    .attr('cy', function(d, i) { return projection([d.LONG, d.LAT])[1]; } )
+    .attr('cx', function(d, i) {
+      var cx = projection([d.LONG, d.LAT])[0];
+
+      var p = Math.round(Math.random()*1);
+      console.log(p);
+
+      if (p == 0) {
+        starts[d.ISO3136] = {};
+        starts[d.ISO3136].x = Math.round(cx);
+      } else {
+        ends[d.ISO3136] = {};
+        ends[d.ISO3136].x = Math.round(cx);
+      }
+
+      return cx;
+
+    } )
+    .attr('cy', function(d, i) {
+      var cy = projection([d.LONG, d.LAT])[1];
+
+      if (starts[d.ISO3136]) {
+        starts[d.ISO3136].y = Math.round(cy);
+      } else {
+        ends[d.ISO3136].y = Math.round(cy);
+      }
+
+      return cy;
+
+    } )
     .attr('r',  function(d, i) {
       if (d.ISO3136 == selectedISO) return 6;
       else return 5;
     })
-    .transition()
-    .duration(750)
-    .delay(function(d, i) { return i * (5 + Math.random()*10); })
-    .style("opacity", function(d) {
-      return .1;
-    })
+    //.transition()
+    //.duration(750)
+    //.delay(function(d, i) { return i * (5 + Math.random()*10); })
+    //.style("opacity", function(d) {
+      //return .1;
+    //})
+
+var count = json.length;
+var j = 0;
+console.log(count);
 
     map
     .append("g")
@@ -134,7 +164,22 @@ function addPoints() {
     .style("opacity", function(d) {
       return .7;
     })
-  });
+        .each("end", function(i) {
+        j++;
+          if (j >= count ){
+          console.log("Finished")
+          console.log(starts, ends);
+
+    //drawParabola(origin, destiny);
+          }
+
+        });
+
+  })
+
+  //setTimeout(function() {
+    //drawParabola(origin, destiny);
+  //}, 2000);
 }
 
 function start() {
@@ -171,17 +216,16 @@ function start() {
     .data(json.features)
     .enter()
     .append("path")
-    .style("opacity", function(d) { return 0; })
+    //.style("opacity", function(d) { return 0; })
     .attr("d", d3.geo.path().projection(projection))
-    .transition()
-    .duration(500)
-    .delay(500)
-    .style("opacity", function(d) {
-      return .4;
-    })
+    //.transition()
+    //.duration(500)
+    //.delay(500)
+    //.style("opacity", function(d) {
+      //return .4;
+    //})
 
     addPoints();
-
   });
 
 }

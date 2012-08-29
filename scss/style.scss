@@ -9,6 +9,7 @@
 body {
   background: #111;
   padding: 40px;
+  text-rendering: optimizeLegibility;
 }
 
 circle {
@@ -41,8 +42,9 @@ path {
 }
 
 .curve {
-  stroke: red;
-  stroke-width: 3px;
+  stroke: #fff;
+  stroke-width: 1px;
+  opacity:.5;
 }
 
 .control {
@@ -51,26 +53,143 @@ path {
   stroke-width: .5px;
 }
 
+
+i { // as in "icon"
+  display: block;
+}
+
 .chrome {
+
+  $chromeWidth:        520px;
+  $chromeHeight:       629px;
+  $shadowWidth:        18px;
+  $shadowHeight:       18px;
+
+  // header
+  $headerTop:          41px;
+  $headerWidth:        $chromeWidth - $shadowWidth*2;
+  $headerHeight:       51px;
+  $headerShadowHeight: 13px;
+  $headerLeft:         $shadowWidth;
+
+  // footer
+  $footerWidth:        $chromeWidth - $shadowWidth*2;
+  $footerHeight:       59px;
+  $footerLeft:         $shadowWidth;
+  $footerBottom:       $shadowHeight;
+
+  // lines
+  $linesTop:           $headerTop + $headerHeight - $headerShadowHeight;
+  $linesLeft:          $shadowWidth;
+
   position:relative;
-  @include size(520px, 629px);
-  background: url(../img/bg-chrome.png) no-repeat;
+  @include size($chromeWidth, $chromeHeight);
+
   margin: auto;
   overflow:hidden;
 
+  background: url(../img/bg-chrome.png) no-repeat;
+
   #canvas {
-    @include position(123px, false, false, 18px);
-    @include size(484px, 410px); // <-- Artificially cropping the map
+    @include position(123px, false, false, $shadowWidth);
+    @include size($chromeWidth - $shadowWidth*2, 410px); // Artificially cropped map
+    z-index: $zTop + 1;
   }
 
   header {
-    @include position(41px, false, false, 18px);
-    @include size(484px, 51px);
+    @include position($headerTop, false, false, $headerLeft);
+    @include size($headerWidth, $headerHeight);
     background: url(../img/bg-chrome-header.png) no-repeat;
   }
+
   footer {
-    @include position(false, false, 18px, 18px);
-    @include size(484px, 59px);
+    @include position(false, false, $footerBottom, $footerLeft);
+    @include size($footerWidth, $footerHeight);
     background: url(../img/bg-chrome-footer.png) no-repeat;
   }
+
+  #lines {
+    @include position($linesTop, false, false, $linesLeft);
+    @include size($chromeWidth - $shadowWidth*2, $chromeHeight - $linesTop - $footerHeight - $footerBottom);
+    z-index: $zTop;
+  }
+}
+
+// Chrome elements
+.chrome header {
+
+  .inner { padding: 10px; }
+
+  ul {
+    clear:both;
+    overflow: hidden;
+
+    li {
+
+      @include text-shadow($cGray0 0px 1px 1px);
+
+      &, a { @include font("sans-serif", 13px, $cWhite); }
+      a { text-decoration: none; }
+
+      i {
+        @include inline-block();
+      }
+
+      &.user   { float: left; }
+      &.status {
+        float: right;
+        color: $cGray3;
+
+        &.ok i {
+          @include size(19px);
+          background: url(../img/status-ok.png) no-repeat;
+        }
+
+      }
+    }
+  }
+}
+
+.chrome #canvas .message {
+  @include absolute-landscape-center(200px);
+  top: 10px;
+
+  text-align: center;
+
+  h2 {
+    margin: 0 0 15px 0;
+
+    @include font("sans-serif-bold", 13px, $cWhite);
+    @include text-shadow($cGray0 0px 1px 1px);
+  }
+
+  i {
+    margin: 0 auto 10px auto;
+    @include size(16px, 17px);
+
+    background: url(../img/connected.png) no-repeat;
+  }
+
+}
+
+// Other elements
+
+.button {
+  @include inline-block();
+
+  padding: 5px 6px 4px 6px;
+  @include border-radius(10px);
+  @include font("sans-serif-bold", 11px, #041A26);
+
+  text-transform: uppercase;
+  text-decoration: none;
+  background: $cWhite;
+
+
+  @include transition(all 300ms ease-in-out);
+
+  &:hover {
+    @include glow(.5);
+  }
+
 }

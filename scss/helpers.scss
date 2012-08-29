@@ -10,6 +10,9 @@ $cGray2:                 #666666;
 $cGray1:                 #333333;
 $cGray0:                 #000000;
 
+/* Indexes */
+$zTop: 1000;
+
 /* Sprites */
 // $icons-name-spacing:10px;
 // @import "icons/*.png";
@@ -60,11 +63,9 @@ $cGray0:                 #000000;
 }
 
 @mixin glow($opacity) {
-  -moz-box-shadow:0px 0px 6px 1px rgba($cWhite, $opacity); /* Firefox v3.5+ */
-  -webkit-box-shadow:0px 0px 6px 1px rgba($cWhite, $opacity); /* Safari v3.0+ and by Chrome v0.2+ */
-  box-shadow:0px 0px 6px 1px rgba($cWhite, $opacity); /* Firefox v4.0+ , Safari v5.1+ , Chrome v10.0+  and by Opera v10.5+ */
-  -ms-filter:"progid:DXImageTransform.Microsoft.Glow(Color = #33ffffff ,Strength = $opacity * 10)";
-  filter:progid:DXImageTransform.Microsoft.Glow(Color = #33ffffff ,Strength = $opacity * 10);
+  @include box-shadow(0 0 10px 1px rgba($cWhite, $opacity));
+  /*-ms-filter:"progid:DXImageTransform.Microsoft.Glow(Color = #33ffffff ,Strength = $opacity * 10)";*/
+  /*filter:progid:DXImageTransform.Microsoft.Glow(Color = #33ffffff ,Strength = $opacity * 10);*/
 }
 
 @mixin button($url, $height, $mL, $pT, $pR, $pB, $pL, $offset-y) {
@@ -90,7 +91,7 @@ $cGray0:                 #000000;
   }
 }
 
-@mixin absolute-vertical-center($width) {
+@mixin absolute-landscape-center($width) {
   position:absolute;
   left:50%;
   width: $width;
@@ -121,38 +122,19 @@ $cGray0:                 #000000;
   -ms-user-select: none;
   user-select: none;
 }
+.serif { font-family: "Georgia", serif; }
 
-.serif {
-  font-family: "Georgia", serif;
-}
-
-.sans-serif {
-  font-family: "SourceSansPro-Regular", Helvetica, Arial, sans-serif;
-}
-.sans-serif-extralight {
-  font-family: "SourceSansPro-ExtraLight", Helvetica, Arial, sans-serif;
-}
-.sans-serif-light {
-  font-family: "SourceSansPro-Light", Georgia;
-}
-.sans-serif-semibold {
-  font-family: "SourceSansPro-Semibold", Helvetica, Arial, sans-serif;
-}
-.sans-serif-bold {
-  font-family: "SourceSansPro-Bold", Helvetica, Arial, sans-serif;
-}
-.sans-serif-black {
-  font-family: "SourceSansPro-Black", Helvetica, Arial, sans-serif;
-}
+.sans-serif          { font-family: "ProximaNova-Regular",  Helvetica, Arial, sans-serif; }
+.sans-serif-light    { font-family: "ProximaNova-Light",    Helvetica, Arial, sans-serif; }
+.sans-serif-semibold { font-family: "ProximaNova-Semibold", Helvetica, Arial, sans-serif; }
+.sans-serif-bold     { font-family: "ProximaNova-Bold",     Helvetica, Arial, sans-serif; }
 
 @mixin font($font, $font-size, $color: false, $font-weight: false) {
 
   @if $font == "sans-serif"            { @extend .sans-serif; }
-  @if $font == "sans-serif-extralight" { @extend .sans-serif-extralight; }
   @if $font == "sans-serif-light"      { @extend .sans-serif-light; }
   @if $font == "sans-serif-semibold"   { @extend .sans-serif-semibold; }
   @if $font == "sans-serif-bold"       { @extend .sans-serif-bold; }
-  @if $font == "sans-serif-black"      { @extend .sans-serif-black; }
 
   @if $color       != false { color: $color; }
   @if $font-size   != false { font-size: $font-size; }
