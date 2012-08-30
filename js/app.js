@@ -1,3 +1,80 @@
+svg = null;
+
+function zoomIn() {
+  //svg.attr("transform", "scale(2)");
+}
+
+function zoomOut() {
+  //svg.attr("transform", "scale(.5)");
+}
+
+function drawParabola(p1, p2) {
+
+  var
+  delta   = .003,
+  points  = [{x:p1.x, y:p1.y}, {x:Math.abs(p1.x - p2.x)/2, y: Math.abs(p2.y - p1.y)/2 }, { x: p2.x, y: p2.y}],
+  line    = d3.svg.line().x(function(d) { return d.x; } ).y(function(d) { return d.y; } ),
+  orders  = d3.range(3, 4);
+
+  var
+  vis = svg.select("#lines")
+  .selectAll("svg")
+  .data(orders)
+  .enter()
+  .append("svg")
+  .append("g");
+
+  vis.selectAll("path.curve")
+  .data(getCurve)
+  .enter()
+  .append("path")
+  .attr("class", "curve")
+  .attr("d", line)
+  //.attr("filter", function(d) {
+    //return "url(#lightBlur)";
+  //})
+
+  function interpolate(d, p) {
+    if (arguments.length < 2) p = t;
+    var r = [];
+
+    for (var i = 1; i < d.length; i++) {
+      var d0 = d[i - 1],
+
+      d1 = d[i];
+      r.push({
+        x: d0.x + (d1.x - d0.x) * p,
+        y: d0.y + (d1.y - d0.y) * p
+      });
+    }
+    return r;
+  }
+
+  function getLevels(d, t_) {
+    if (arguments.length < 2) t_ = t;
+    var x = [points.slice(0, d)];
+    for (var i = 1; i < d; i++) {
+      x.push(interpolate(x[x.length - 1], t_));
+    }
+    return x;
+  }
+
+  function getCurve(d) {
+    curve = [];
+
+    for (var t_ = 0; t_ <= 1; t_ += delta) {
+      var x = getLevels(d, t_);
+      curve.push(x[x.length - 1][0]);
+    }
+
+    return [curve];
+  }
+}
+
+function redraw() {
+  svg.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
+}
+
 function setupFilters(svg) {
   // Light blur
   svg.append("svg:defs")
@@ -27,7 +104,7 @@ function start() {
   .scale(500)
   .translate([240, 300]);
 
-  var svg = d3.select("#canvas")
+  svg = d3.select("#canvas")
   .append("svg")
   .call(d3.behavior.zoom()
   .on("zoom", redraw))
@@ -38,6 +115,7 @@ function start() {
   svg.append("g").attr("id", "states");
   svg.append("g").attr("id", "my_points");
   svg.append("g").attr("id", "my_points2");
+  svg.append("g").attr("id", "lines");
 
   d3.json("data/countries.json", function(collection) {
     svg.select("#states")
@@ -47,7 +125,6 @@ function start() {
     .attr("d", d3.geo.path().projection(projection));
 
     d3.csv("data/centroids.csv", function(collection) {
-      console.log(collection);
       svg.select("#my_points")
       .selectAll("circle")
       .data(collection)
@@ -59,6 +136,7 @@ function start() {
         return projection([d.LONG, d.LAT])[0];
       })
       .attr('cy', function(d, i) {
+
         return projection([d.LONG, d.LAT])[1];
       })
       .attr("r", 2)
@@ -77,12 +155,14 @@ function start() {
       .attr("r", .2)
     });
 
+    function getCoordinates(lat, lng) {
+      var xy = projection([lat, lng]);
+      return { x: xy[0], y: xy[1] };
+    }
+
+    drawParabola(getCoordinates(-12.5, 18.5), getCoordinates(40,45));
 
   });
-
-  function redraw() {
-    svg.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
-  }
 }
 
 /*
