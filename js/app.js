@@ -12,7 +12,7 @@ function drawParabola(p1, p2) {
 
   var
   delta   = .003,
-  points  = [{x:p1.x, y:p1.y}, {x:Math.abs(p1.x + p2.x)/2, y: Math.min(p2.y, p1.y)-50 }, { x: p2.x, y: p2.y}],
+  points  = [{x:p1.x, y:p1.y}, {x:Math.abs(p1.x + p2.x)/2, y: Math.min(p2.y, p1.y)-Math.abs(p2.x - p1.x)*0.5 }, { x: p2.x, y: p2.y}],
   line    = d3.svg.line().x(function(d) { return d.x; } ).y(function(d) { return d.y; } ),
   orders  = d3.range(3, 4);
 
