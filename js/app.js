@@ -1,4 +1,9 @@
+vis = null;
 svg = null;
+t = .5;
+last = 0;
+stroke = d3.scale.category20b();
+
 
 function zoomIn() {
   //svg.attr("transform", "scale(2)");
@@ -16,7 +21,9 @@ function drawParabola(p1, p2) {
   line    = d3.svg.line().x(function(d) { return d.x; } ).y(function(d) { return d.y; } ),
   orders  = d3.range(3, 4);
 
-  svg.select("#lines")
+  vis = svg.select("#lines")
+
+  vis
   .data(orders)
   .selectAll("path.curve")
   .data(getCurve)
@@ -63,6 +70,44 @@ function drawParabola(p1, p2) {
 
     return [curve];
   }
+
+  update();
+
+  d3.timer(function(elapsed) {
+    t = (t + (elapsed - last) / 2000) % 1;
+    last = elapsed;
+    update();
+  });
+
+  function update() {
+    if (!vis) return;
+
+    var interpolation = vis.selectAll("g").data(function(d) {
+      return getLevels(d, t);
+    });
+
+    interpolation.enter().append("g")
+    .style("fill", colour)
+    .style("stroke", colour);
+
+    var circle = interpolation.selectAll("circle").data(Object);
+    circle.enter().append("circle").attr("r", 4);
+    circle.attr("cx", x).attr("cy", y);
+
+  }
+
+
+
+
+}
+
+
+function x(d) {
+  return d.x;
+}
+
+function y(d) {
+  return d.y;
 }
 
 function redraw() {
@@ -137,7 +182,6 @@ function start() {
     });
 
     d3.csv("data/centroids.csv", function(collection) {
-      console.log(collection);
       svg.select("#my_points2")
       .selectAll("circle")
       .data(collection)
@@ -154,23 +198,30 @@ function start() {
       return { x: xy[0], y: xy[1] };
     }
 
-    drawParabola(getCoordinates(-73, 60), getCoordinates(3, 40));
+    //drawParabola(getCoordinates(-73, 60), getCoordinates(3, 40));
     drawParabola(getCoordinates(-73, 40), getCoordinates(3, 40));
-    drawParabola(getCoordinates(-73, 20), getCoordinates(3, 40));
-    drawParabola(getCoordinates(-73, 0), getCoordinates(3, 40));
-    drawParabola(getCoordinates(-73, -20), getCoordinates(3, 40));
+    //drawParabola(getCoordinates(-73, 20), getCoordinates(3, 40));
+    //drawParabola(getCoordinates(-73, 0), getCoordinates(3, 40));
+    //drawParabola(getCoordinates(-73, -20), getCoordinates(3, 40));
     drawParabola(getCoordinates(-73, -40), getCoordinates(3, 40));
-    drawParabola(getCoordinates(-73, -60), getCoordinates(3, 40));    
+    //drawParabola(getCoordinates(-73, -60), getCoordinates(3, 40));
 
 
-    drawParabola(getCoordinates(0, 0), getCoordinates(10,0));
-    drawParabola(getCoordinates(0, 0), getCoordinates(50,0));
-    drawParabola(getCoordinates(0, 0), getCoordinates(100,0));    
-    drawParabola(getCoordinates(0, 0), getCoordinates(150,0));    
+    //drawParabola(getCoordinates(0, 0), getCoordinates(10,0));
+    //drawParabola(getCoordinates(0, 0), getCoordinates(50,0));
+    //drawParabola(getCoordinates(0, 0), getCoordinates(100,0));
+    //drawParabola(getCoordinates(0, 0), getCoordinates(150,0));
 
 
 
     //drawParabola(getCoordinates(12.5, 28.5), getCoordinates(10,45));
 
   });
+}
+
+
+function colour(d, i) {
+  stroke(-i);
+  console.log(d);
+  return d.length > 1 ? "none" : "red";
 }
