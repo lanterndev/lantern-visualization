@@ -44,9 +44,10 @@ i { // as in "icon"
   background: url(../img/bg-chrome.png) no-repeat;
 
   #canvas {
-    @include position(123px, false, false, $shadowWidth);
-    @include size($chromeWidth - $shadowWidth*2, 410px); // Artificially cropped map
+    @include position($headerTop + $headerHeight - $headerShadowHeight, false, false, $shadowWidth);
+    @include size($chromeWidth - $shadowWidth*2, $chromeHeight - $footerHeight - $headerHeight - $shadowHeight*2);
     z-index: $zTop + 1;
+    overflow:hidden;
   }
 
   header {
@@ -104,6 +105,39 @@ i { // as in "icon"
   }
 }
 
+.chrome #canvas {
+
+  .controls {
+
+    &#zoom {
+      @include position(false, false, 20px, 20px);
+    }
+
+    &#options {
+      @include position(false, 20px, 20px, false);
+    }
+
+    clear: both;
+    overflow:hidden;
+
+    li {
+      float:left;
+
+      a {
+        display: block;
+        @include size(35px);
+        background:$cGray0;
+        margin: 0 3px 0 0;
+
+        opacity: .55;
+
+      }
+        &:first-child a { @include border-radius(3px 0 0 3px); }
+        &:last-child  a { @include border-radius(0 3px 3px 0); }
+    }
+  }
+}
+
 .chrome footer {
   .inner { margin: 20px 0 0 0; padding: 10px; }
 
@@ -115,7 +149,7 @@ i { // as in "icon"
 
 .chrome #canvas .message {
   @include absolute-landscape-center(200px);
-  top: 10px;
+  top: 40px;
 
   text-align: center;
 
@@ -148,7 +182,6 @@ i { // as in "icon"
   text-decoration: none;
   background: $cWhite;
 
-
   @include transition(all 300ms ease-in-out);
 
   &:hover {
@@ -160,6 +193,12 @@ i { // as in "icon"
 circle {
   stroke:1px;
   opacity:.5;
+  fill: $cWhite;
+}
+
+#my_points2 circle{
+  fill: #fff;
+  opacity:.7;
 }
 
 circle.hollow {
@@ -169,13 +208,13 @@ circle.hollow {
   opacity:.7;
 }
 
-circle.glow {
+.glow {
   stroke:none;
   opacity:.1;
 }
 
-path {
-  stroke:black;
+#states path {
+  stroke:none;
   stroke-width:0.3px;
   fill:black;
   opacity:.5;
@@ -197,5 +236,3 @@ path {
   stroke: #000;
   stroke-width: .5px;
 }
-
-
