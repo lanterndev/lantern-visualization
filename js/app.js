@@ -12,7 +12,7 @@ function drawParabola(p1, p2) {
 
   var
   delta   = .003,
-  points  = [{x:p1.x, y:p1.y}, {x:Math.abs(p1.x - p2.x)/2, y: Math.abs(p2.y - p1.y)/2 }, { x: p2.x, y: p2.y}],
+  points  = [{x:p1.x, y:p1.y}, {x:Math.abs(p1.x + p2.x)/2, y: Math.min(p2.y, p1.y)-50 }, { x: p2.x, y: p2.y}],
   line    = d3.svg.line().x(function(d) { return d.x; } ).y(function(d) { return d.y; } ),
   orders  = d3.range(3, 4);
 
@@ -25,7 +25,7 @@ function drawParabola(p1, p2) {
   .attr("class", "parabola")
   .attr("d", line)
   //.attr("filter", function(d) {
-  //return "url(#lightBlur)";
+  //  return "url(#lightBlur)";
   //})
 
   function interpolate(d, p) {
@@ -154,8 +154,23 @@ function start() {
       return { x: xy[0], y: xy[1] };
     }
 
-    drawParabola(getCoordinates(-12.5, 18.5), getCoordinates(40,45));
-    drawParabola(getCoordinates(12.5, 28.5), getCoordinates(10,45));
+    drawParabola(getCoordinates(-73, 60), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, 40), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, 20), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, 0), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, -20), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, -40), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, -60), getCoordinates(3, 40));    
+
+
+    drawParabola(getCoordinates(0, 0), getCoordinates(10,0));
+    drawParabola(getCoordinates(0, 0), getCoordinates(50,0));
+    drawParabola(getCoordinates(0, 0), getCoordinates(100,0));    
+    drawParabola(getCoordinates(0, 0), getCoordinates(150,0));    
+
+
+
+    //drawParabola(getCoordinates(12.5, 28.5), getCoordinates(10,45));
 
   });
 }
