@@ -244,13 +244,9 @@ circle.hollow {
 }
 
 .parabola{
-  stroke: #fff;
-  stroke-width: .4px;
+  stroke: $cWhite;
+  stroke-width: 1;
   opacity:.5;
+  stroke-linecap: round;
 }
 
-.control {
-  fill: #ccc;
-  stroke: #000;
-  stroke-width: .5px;
-}

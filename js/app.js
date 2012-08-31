@@ -1,4 +1,17 @@
 svg = null;
+centroids = [];
+projection = null;
+
+starts = [], ends = [];
+
+function getCoordinates(coordinates) {
+  return { x: coordinates[0], y: coordinates[1] };
+}
+
+function getCoordinates_(lat, lng) {
+  var xy = projection([lat, lng]);
+  return { x: xy[0], y: xy[1] };
+}
 
 function zoomIn() {
   //svg.attr("transform", "scale(2)");
@@ -12,11 +25,14 @@ function drawParabola(p1, p2) {
 
   var
   delta   = .003,
-  points  = [{x:p1.x, y:p1.y}, {x:Math.abs(p1.x - p2.x)/2, y: Math.abs(p2.y - p1.y)/2 }, { x: p2.x, y: p2.y}],
-  line    = d3.svg.line().x(function(d) { return d.x; } ).y(function(d) { return d.y; } ),
+  points  = [{x:p1.x, y:p1.y}, {x:Math.abs(p1.x + p2.x)/2, y: Math.min(p2.y, p1.y)-Math.abs(p2.x - p1.x)*0.5 }, { x: p2.x, y: p2.y}],
+  line    = d3.svg.line()
+  .x(function(d) { return d.x; } )
+  .y(function(d) { return d.y; } ),
+
   orders  = d3.range(3, 4);
 
-  svg.select("#lines")
+  var path = svg.select("#lines")
   .data(orders)
   .selectAll("path.curve")
   .data(getCurve)
@@ -63,6 +79,54 @@ function drawParabola(p1, p2) {
 
     return [curve];
   }
+
+  var circle = svg.append("circle")
+  .attr("r", 2)
+  .attr("fill", "white")
+  .style("opacity", .7)
+  .attr("filter", "url(#mediumBlur)");
+
+  transition();
+
+  function transition() {
+    circle
+    .transition()
+    .duration(800)
+    .style("opacity", .33)
+    .attr("r", 2)
+    .transition()
+    .duration(function(d, i)    {
+      var duration = Math.round(Math.random(50) * 2500);
+      return duration;
+    })
+    .delay(function(d, i)    {
+      var delay = Math.round(Math.random(100) * 2500);
+      return delay;
+    })
+    .style("opacity", 1)
+    .attr("r", 1)
+    .attrTween("transform", translateAlong(path.node()))
+    .each("end", function(t) {
+
+      circle
+      .transition()
+      .duration(500)
+      .attr("r", 1)
+      .style("opacity", 0)
+      .each("end", transition);
+
+    });
+  }
+
+  function translateAlong(path) {
+    var l = path.getTotalLength();
+    return function(d, i, a) {
+      return function(t) {
+        var p = path.getPointAtLength(t * l);
+        return "translate(" + p.x + "," + p.y + ")";
+      };
+    };
+  }
 }
 
 function redraw() {
@@ -77,13 +141,19 @@ function setupFilters(svg) {
   .append("svg:feGaussianBlur")
   .attr("stdDeviation", .7);
 
+  // Medium blur
+  svg.append("svg:defs")
+  .append("svg:filter")
+  .attr("id", "mediumBlur")
+  .append("svg:feGaussianBlur")
+  .attr("stdDeviation", 0.5);
+
   // Strong blur
   svg.append("svg:defs")
   .append("svg:filter")
   .attr("id", "strongBlur")
   .append("svg:feGaussianBlur")
   .attr("stdDeviation", 2.5);
-
 }
 
 function start() {
@@ -94,7 +164,7 @@ function start() {
   .range([0, 10]);
 
   // Our projection.
-  var projection = d3.geo.mercator()
+  projection = d3.geo.mercator()
   .scale(500)
   .translate([240, 300]);
 
@@ -137,25 +207,62 @@ function start() {
     });
 
     d3.csv("data/centroids.csv", function(collection) {
-      console.log(collection);
+
+      centroids = collection;
+
       svg.select("#my_points2")
       .selectAll("circle")
       .data(collection)
       .enter()
       .append("circle")
       .attr("class", "glow")
-      .attr('cx', function(d, i) { return projection([d.LONG, d.LAT])[0]; })
+      .attr('cx', function(d, i) {
+
+        var p = Math.round(Math.random()*10);
+        var coordinates = projection([d.LONG, d.LAT]);
+        //console.log(coordinates);
+
+        if (p == 1) {
+          starts.push(coordinates);
+        } else if (p == 0) {
+          ends.push(coordinates);
+        }
+
+
+        return coordinates[0];
+      })
       .attr('cy', function(d, i) { return projection([d.LONG, d.LAT])[1]; })
-      .attr("r", .2)
+      .attr("r", .2);
+
+
+      _.each(starts, function(c) {
+
+        i = Math.round(Math.random(10) * (ends.length - 1));
+        drawParabola(getCoordinates(c), getCoordinates(ends[i]));
+      });
+
+
+
+    //drawParabola(getCoordinates(starts[0][0], starts[0][1]), getCoordinates(10,45));
+
+    /*drawParabola(getCoordinates(-12.5, 18.5), getCoordinates(40,45));
+    drawParabola(getCoordinates(12.5, 28.5), getCoordinates(10,45));
+    drawParabola(getCoordinates(-73, 60), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, 40), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, 20), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, 0), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, -20), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, -40), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, -60), getCoordinates(3, 40));
+    drawParabola(getCoordinates(0, 0), getCoordinates(10,0));
+    drawParabola(getCoordinates(0, 0), getCoordinates(50,0));
+    drawParabola(getCoordinates(0, 0), getCoordinates(100,0));
+    drawParabola(getCoordinates(0, 0), getCoordinates(150,0));
+*/
     });
 
-    function getCoordinates(lat, lng) {
-      var xy = projection([lat, lng]);
-      return { x: xy[0], y: xy[1] };
-    }
 
-    drawParabola(getCoordinates(-12.5, 18.5), getCoordinates(40,45));
-    drawParabola(getCoordinates(12.5, 28.5), getCoordinates(10,45));
+
 
   });
 }
