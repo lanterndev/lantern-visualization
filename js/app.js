@@ -22,19 +22,54 @@ function zoomOut() {
   //svg.attr("transform", "scale(.5)");
 }
 
+function translateAlong(path) {
+  var l = path.getTotalLength();
+  return function(d, i, a) {
+    return function(t) {
+      var p = path.getPointAtLength(t * l);
+      return "translate(" + p.x + "," + p.y + ")";
+    };
+  };
+}
+
+function transition(circle, path) {
+
+  circle
+  .transition()
+  .duration(800)
+  .style("opacity", .25)
+  .transition()
+  .duration(Math.round(Math.random(50) * 2500))
+  .delay(Math.round(Math.random(100) * 2500))
+  .style("opacity", .25)
+  .attrTween("transform", translateAlong(path.node()))
+  .each("end", function(t) {
+
+    circle
+    .transition()
+    .duration(500)
+    .style("opacity", 0)
+    .each("end", function() {
+      transition(circle, path);
+    });
+
+  });
+}
+
 function drawParabola(p1, p2) {
 
   var
-  delta   = .05,
-  points  = [{x:p1.x, y:p1.y}, {x:Math.abs(p1.x + p2.x)/2, y: Math.min(p2.y, p1.y)-Math.abs(p2.x - p1.x)*0.5 }, { x: p2.x, y: p2.y}],
+  delta  = .05,
+  points = [{x:p1.x, y:p1.y}, {x:Math.abs(p1.x + p2.x)/2, y: Math.min(p2.y, p1.y)-Math.abs(p2.x - p1.x)*0.5 }, { x: p2.x, y: p2.y}],
 
-  line    = d3.svg.line()
+  line = d3.svg.line()
   .x(function(d) { return d.x; } )
   .y(function(d) { return d.y; } ),
 
   orders  = d3.range(3, 4);
 
-  var path = svg.select("#lines")
+  var path = svg
+  .select("#lines")
   .data(orders)
   .selectAll("path.curve")
   .data(getCurve)
@@ -79,100 +114,37 @@ function drawParabola(p1, p2) {
     return [curve];
   }
 
-  var circle =
-  svg.append("g")
-  .attr("id", "my_points3")
+  var circle = svg
+  .append("g")
+  .attr("id", "beams")
   .append("circle")
   .attr("r", 3)
-  .attr("class", "spark")
-  .attr("fill", "white")
-  .style("opacity", .25)
-  .attr("filter", "url(#sparkBlur)");
+  .attr("class", "beam")
+  .attr("filter", "url(#blur.beam)");
 
-  transition();
-
-  function transition() {
-    circle
-    .transition()
-    .duration(800)
-    .style("opacity", .25)
-    .transition()
-    .duration(function(d, i)    {
-      var duration = Math.round(Math.random(50) * 2500);
-      return duration;
-    })
-    .delay(function(d, i)    {
-      var delay = Math.round(Math.random(100) * 2500);
-      return delay;
-    })
-    .style("opacity", .25)
-    .attrTween("transform", translateAlong(path.node()))
-    .each("end", function(t) {
-
-      circle
-      .transition()
-      .duration(500)
-      .style("opacity", 0)
-      .each("end", transition);
-
-    });
-  }
-
-  function translateAlong(path) {
-    var l = path.getTotalLength();
-    return function(d, i, a) {
-      return function(t) {
-        var p = path.getPointAtLength(t * l);
-        return "translate(" + p.x + "," + p.y + ")";
-      };
-    };
-  }
+  transition(circle, path);
 }
 
 function redraw() {
   svg.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
 }
 
+function addBlur(name, deviation) {
+  svg
+  .append("svg:defs")
+  .append("svg:filter")
+  .attr("id", "blur." + name)
+  .append("svg:feGaussianBlur")
+  .attr("stdDeviation", deviation);
+}
+
 function setupFilters(svg) {
-  // Light blur
-  svg.append("svg:defs")
-  .append("svg:filter")
-  .attr("id", "lightBlur")
-  .append("svg:feGaussianBlur")
-  .attr("stdDeviation", .7);
-
-  // Medium blur
-  svg.append("svg:defs")
-  .append("svg:filter")
-  .attr("id", "mediumBlur")
-  .append("svg:feGaussianBlur")
-  .attr("stdDeviation", 0.7);
-
-  // Strong blur
-  svg.append("svg:defs")
-  .append("svg:filter")
-  .attr("id", "strongBlur")
-  .append("svg:feGaussianBlur")
-  .attr("stdDeviation", 2.5);
-
-  svg.append("svg:defs")
-  .append("svg:filter")
-  .attr("id", "sparkBlur")
-  .append("svg:feGaussianBlur")
-  .attr("stdDeviation", 0.9);
-
-  svg.append("svg:defs")
-  .append("svg:filter")
-  .attr("id", "nodeBlur")
-  .append("svg:feGaussianBlur")
-  .attr("stdDeviation", 0.35);
-
-  // Green blur
-  svg.append("svg:defs")
-  .append("svg:filter")
-  .attr("id", "greenBlur")
-  .append("svg:feGaussianBlur")
-  .attr("stdDeviation", 1.9);
+  addBlur("light",   .7);
+  addBlur("medium",  .7);
+  addBlur("strong", 2.5);
+  addBlur("beam",    .9);
+  addBlur("node",    .35);
+  addBlur("green",   1.9);
 }
 
 function start() {
@@ -213,15 +185,10 @@ function start() {
       .data(collection)
       .enter()
       .append("circle")
-      .attr("filter", "url(#lightBlur)")
+      .attr("filter", "url(#blur.light)")
       .attr("class", "glow")
-      .attr('cx', function(d, i) {
-        return projection([d.LONG, d.LAT])[0];
-      })
-      .attr('cy', function(d, i) {
-
-        return projection([d.LONG, d.LAT])[1];
-      })
+      .attr('cx', function(d) { return projection([d.LONG, d.LAT])[0]; } )
+      .attr('cy', function(d) { return projection([d.LONG, d.LAT])[1]; } )
       .attr("r", 2)
     });
 
@@ -239,13 +206,9 @@ function start() {
 
         var p = Math.round(Math.random()*10);
         var coordinates = projection([d.LONG, d.LAT]);
-        //console.log(coordinates);
 
         if (p == 1) {
           starts.push(coordinates);
-        } else if (p == 3) {
-
-
         } else if (p == 0) {
           ends.push(coordinates);
         }
@@ -263,20 +226,32 @@ function start() {
 
       function addNode(c, j) {
 
-        console.log(i, starts[j][0], starts[j][1]);
+      var cx = starts[j][0];
+      var cy = starts[j][1];
 
         c.append("circle").attr("r", 2.7)
         .attr("class", "prueba")
-        .attr('cx', function(d, i) { return starts[j][0]; })
-        .attr('cy', function(d, i) { return starts[j][1]; })
-        .attr("filter", "url(#nodeBlur)");
+        .attr('cx', cx)
+        .attr('cy', cy)
+        .attr("filter", "url(#blur.node)");
 
         c.append("circle")
-        .attr("class", "prueba_glow")
+        .attr("class", "green")
         .attr("r", 9)
-        .attr('cx', function(d, i) { return starts[j][0]; })
-        .attr('cy', function(d, i) { return starts[j][1]; })
-        .attr("filter", "url(#greenBlur)");
+        .attr('cx', cx)
+        .attr('cy', cy)
+        .attr("filter", "url(#blur.green)")
+        .on("click", function(d) {
+
+          $(".abc").fadeOut(150, function() {
+            $(".abc").removeClass("zoom");
+            $(".abc").css({ width: 20, height: 20, top: cy + 69, left: cx + 9 });
+            $(".abc").fadeIn(150, function() {
+              $(".abc").addClass("zoom");
+            });
+          });
+
+        });
 
       }
 
