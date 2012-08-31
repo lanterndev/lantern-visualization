@@ -153,6 +153,19 @@ function setupFilters(svg) {
   .attr("id", "strongBlur")
   .append("svg:feGaussianBlur")
   .attr("stdDeviation", 2.5);
+
+  svg.append("svg:defs")
+  .append("svg:filter")
+  .attr("id", "nodeBlur")
+  .append("svg:feGaussianBlur")
+  .attr("stdDeviation", 0.35);
+
+  // Green blur
+  svg.append("svg:defs")
+  .append("svg:filter")
+  .attr("id", "greenBlur")
+  .append("svg:feGaussianBlur")
+  .attr("stdDeviation", 1.9);
 }
 
 function start() {
@@ -245,18 +258,18 @@ function start() {
 
         console.log(i, starts[j][0], starts[j][1]);
 
-        c.append("circle").attr("r", 3)
+        c.append("circle").attr("r", 2.7)
         .attr("class", "prueba")
         .attr('cx', function(d, i) { return starts[j][0]; })
         .attr('cy', function(d, i) { return starts[j][1]; })
-        .attr("filter", "url(#mediumBlur)");
+        .attr("filter", "url(#nodeBlur)");
 
         c.append("circle")
         .attr("class", "prueba_glow")
         .attr("r", 9)
         .attr('cx', function(d, i) { return starts[j][0]; })
         .attr('cy', function(d, i) { return starts[j][1]; })
-        .attr("filter", "url(#strongBlur)");
+        .attr("filter", "url(#greenBlur)");
 
       }
 
@@ -266,6 +279,7 @@ function start() {
 
       addNode(c, 2);
       addNode(c, 3);
+      addNode(c, 5);
       addNode(c, 13);
 
     });
