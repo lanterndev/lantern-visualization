@@ -84,9 +84,10 @@ function drawParabola(p1, p2) {
   .attr("id", "my_points3")
   .append("circle")
   .attr("r", 3)
+  .attr("class", "spark")
   .attr("fill", "white")
-  .style("opacity", .3)
-  .attr("filter", "url(#mediumBlur)");
+  .style("opacity", .25)
+  .attr("filter", "url(#sparkBlur)");
 
   transition();
 
@@ -94,7 +95,7 @@ function drawParabola(p1, p2) {
     circle
     .transition()
     .duration(800)
-    .style("opacity", .33)
+    .style("opacity", .25)
     .transition()
     .duration(function(d, i)    {
       var duration = Math.round(Math.random(50) * 2500);
@@ -104,7 +105,7 @@ function drawParabola(p1, p2) {
       var delay = Math.round(Math.random(100) * 2500);
       return delay;
     })
-    .style("opacity", 1)
+    .style("opacity", .25)
     .attrTween("transform", translateAlong(path.node()))
     .each("end", function(t) {
 
@@ -153,6 +154,12 @@ function setupFilters(svg) {
   .attr("id", "strongBlur")
   .append("svg:feGaussianBlur")
   .attr("stdDeviation", 2.5);
+
+  svg.append("svg:defs")
+  .append("svg:filter")
+  .attr("id", "sparkBlur")
+  .append("svg:feGaussianBlur")
+  .attr("stdDeviation", 0.9);
 
   svg.append("svg:defs")
   .append("svg:filter")
