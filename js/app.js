@@ -23,7 +23,7 @@ function drawParabola(p1, p2) {
 
   vis = svg.select("#lines")
 
-var path =  vis
+  var path =  vis
   .data(orders)
   .selectAll("path.curve")
   .data(getCurve)
@@ -73,28 +73,29 @@ var path =  vis
   }
 
 
-        var circle = svg.append("circle")
-        .attr("r", 3)
-        .attr("fill", "white")
+  var circle = svg.append("circle")
+  .attr("r", 3)
+  .attr("fill", "white")
+  .attr("filter", "url(#Blur)")
 
-        transition();
+  transition();
 
-        function transition() {
-          circle.transition()
-          .duration(5000)
-          .attrTween("transform", translateAlong(path.node()))
-          .each("end", transition);
-        }
+  function transition() {
+    circle.transition()
+    .duration(5000)
+    .attrTween("transform", translateAlong(path.node()))
+    .each("end", transition);
+  }
 
-        function translateAlong(path) {
-          var l = path.getTotalLength();
-          return function(d, i, a) {
-            return function(t) {
-              var p = path.getPointAtLength(t * l);
-              return "translate(" + p.x + "," + p.y + ")";
-            };
-          };
-        }
+  function translateAlong(path) {
+    var l = path.getTotalLength();
+    return function(d, i, a) {
+      return function(t) {
+        var p = path.getPointAtLength(t * l);
+        return "translate(" + p.x + "," + p.y + ")";
+      };
+    };
+  }
 
 
 }
