@@ -23,7 +23,7 @@ function drawParabola(p1, p2) {
 
   vis = svg.select("#lines")
 
-  vis
+var path =  vis
   .data(orders)
   .selectAll("path.curve")
   .data(getCurve)
@@ -31,6 +31,7 @@ function drawParabola(p1, p2) {
   .append("path")
   .attr("class", "parabola")
   .attr("d", line)
+
   //.attr("filter", function(d) {
   //  return "url(#lightBlur)";
   //})
@@ -71,32 +72,29 @@ function drawParabola(p1, p2) {
     return [curve];
   }
 
-  update();
 
-  d3.timer(function(elapsed) {
-    t = (t + (elapsed - last) / 2000) % 1;
-    last = elapsed;
-    update();
-  });
+        var circle = svg.append("circle")
+        .attr("r", 3)
+        .attr("fill", "white")
 
-  function update() {
-    if (!vis) return;
+        transition();
 
-    var interpolation = vis.selectAll("g").data(function(d) {
-      return getLevels(d, t);
-    });
+        function transition() {
+          circle.transition()
+          .duration(5000)
+          .attrTween("transform", translateAlong(path.node()))
+          .each("end", transition);
+        }
 
-    interpolation.enter().append("g")
-    .style("fill", colour)
-    .style("stroke", colour);
-
-    var circle = interpolation.selectAll("circle").data(Object);
-    circle.enter().append("circle").attr("r", 4);
-    circle.attr("cx", x).attr("cy", y);
-
-  }
-
-
+        function translateAlong(path) {
+          var l = path.getTotalLength();
+          return function(d, i, a) {
+            return function(t) {
+              var p = path.getPointAtLength(t * l);
+              return "translate(" + p.x + "," + p.y + ")";
+            };
+          };
+        }
 
 
 }
@@ -200,8 +198,8 @@ function start() {
 
     //drawParabola(getCoordinates(-73, 60), getCoordinates(3, 40));
     drawParabola(getCoordinates(-73, 40), getCoordinates(3, 40));
-    //drawParabola(getCoordinates(-73, 20), getCoordinates(3, 40));
-    //drawParabola(getCoordinates(-73, 0), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, 20), getCoordinates(3, 40));
+    drawParabola(getCoordinates(-73, 0), getCoordinates(3, 40));
     //drawParabola(getCoordinates(-73, -20), getCoordinates(3, 40));
     drawParabola(getCoordinates(-73, -40), getCoordinates(3, 40));
     //drawParabola(getCoordinates(-73, -60), getCoordinates(3, 40));
@@ -217,11 +215,4 @@ function start() {
     //drawParabola(getCoordinates(12.5, 28.5), getCoordinates(10,45));
 
   });
-}
-
-
-function colour(d, i) {
-  stroke(-i);
-  console.log(d);
-  return d.length > 1 ? "none" : "red";
 }

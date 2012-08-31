@@ -1,0 +1,86 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Quick quick, HTML</title>
+
+    <script src="js/vendor/d3.v2.min.js" type="text/javascript" charset="utf-8"></script>
+
+    <style>
+      circle {
+       .curve, .line {
+        fill: none;
+        stroke-width: 1px;
+      }
+      .curve {
+        stroke: red;
+        stroke-width: 3px;
+      }
+    </style>
+    <script type="text/javascript">
+      function start() {
+
+        width = 500;
+        height = 200;
+
+        var n  = 10,
+        random = d3.random.normal(0, .2),
+        data = d3.range(n).map(random);
+
+        var x = d3.scale.linear()
+        .domain([0, n - 1])
+        .range([0, width]);
+
+        var y = d3.scale.linear()
+        .domain([-1, 1])
+        .range([height, 0]);
+
+        var line = d3.svg.line()
+        .tension(0) // Catmull–Rom
+        .interpolate("basis")
+        .x(function(d, i) { return x(i); })
+        .y(function(d, i) { return y(d); });
+
+        var svg = d3.select("#canvas").append("svg");
+
+        var path = svg.append("path")
+        .data([data])
+        .attr("d", line) //this calls the line function with this element's data
+        .style("fill", "none")
+        .style("stroke", "#000000")
+
+        var circle = svg.append("circle")
+        .attr("r", 3)
+
+        transition();
+
+        function transition() {
+          circle.transition()
+          .duration(5000)
+          .attrTween("transform", translateAlong(path.node()))
+          .each("end", transition);
+        }
+        
+        function translateAlong(path) {
+          var l = path.getTotalLength();
+          return function(d, i, a) {
+            return function(t) {
+              var p = path.getPointAtLength(t * l);
+              return "translate(" + p.x + "," + p.y + ")";
+            };
+          };
+        }
+
+      }
+
+
+
+
+    </script>
+  </head>
+  <body onload="start();">
+    <div id="canvas">
+    </div>
+  </body>
+</html>
+
