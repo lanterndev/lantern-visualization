@@ -207,9 +207,20 @@ i { // as in "icon"
   }
 }
 
+.prueba_glow {
+  stroke:1;
+  fill: #AAD092;
+  opacity:.3;
+}
+.prueba {
+  stroke:1;
+  fill: #AAD092;
+  opacity:1;
+}
+
 // SVG
 circle {
-  stroke:1px;
+  stroke:1;
   opacity:.5;
   fill: $cWhite;
 }
@@ -221,7 +232,7 @@ circle {
 
 circle.hollow {
   stroke:#FF6666;
-  stroke-width:2px;
+  stroke-width:2;
   fill:none;
   opacity:.7;
 }
@@ -233,14 +244,14 @@ circle.hollow {
 
 #states path {
   stroke:none;
-  stroke-width:0.3px;
+  stroke-width:0.3;
   fill:black;
-  opacity:.5;
+  opacity:.3;
 }
 
 .parabola, .line {
   fill: none;
-  stroke-width: 1px;
+  stroke-width: 1;
 }
 
 .parabola{
