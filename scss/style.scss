@@ -210,26 +210,28 @@ i { // as in "icon"
 .beam {
   stroke:none;
   fill: $cWhite;
-  opacity: .25;
+  opacity: .3;
 }
 
-.green {
+.green_glow {
   stroke:1;
   fill: #AAD092;
   opacity:.15;
   cursor: pointer;
+  z-index: 1000;
 }
 
-.prueba {
+.dot_green {
   stroke:1;
   fill: #AAD092;
   opacity:1;
+
+  z-index: 1000;
 }
 
 // SVG
 circle {
   stroke:1;
-  opacity:.5;
   fill: $cWhite;
 }
 
@@ -257,37 +259,56 @@ circle.hollow {
   opacity:.3;
 }
 
-.parabola, .line {
+.parabola {
   fill: none;
-  stroke-width: 1;
-}
-
-.parabola{
   stroke: $cWhite;
-  stroke-width: 1;
   opacity:.5;
   stroke-linecap: round;
 }
 
-
-
 .abc {
 
-  position: absolute;
-
-  background:rgba(0, 0, 0, .9);
-
-  -webkit-transform-origin: 50% 50%;
-  -webkit-transition: all 150ms ease-in-out;
-  -webkit-border-radius: 75px;
-
-  pointer-events: none;
-
   display: none;
-  z-index: 10000;
+
+  position: absolute;
+  @include size(119px);
+
+  /*pointer-events: none;*/
+
+  background: url(../img/circle.png) no-repeat;
+  /*border: 1px solid red;*/
+
+  z-index: 5500;
+
+  .arm {
+    @include size(0px, 26px);
+    @include position(45px, false, false, 58px);
+
+    -webkit-transform-origin: 0 50%;
+    text-align: right
+  }
+
+  i {
+    $size: 22px;
+
+    @include position(0, 0, false, false);
+    @include size($size);
+
+    opacity: 0;
+    background: url("../img/tmp/thumb.jpeg") no-repeat 50% 50%;
+    background-size: $size $size;
+
+    border: 2px solid $cGray0;
+
+    -webkit-background-clip: padding-box;
+    @include border-radius(100px);
+  }
 }
 
 .zoom {
-  opacity:.7;
-  -webkit-transform: scale(8);
+  opacity:1;
+  /*-webkit-transform: scale(8);*/
+  width: 119px; height: 119px;
 }
+
+

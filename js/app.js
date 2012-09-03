@@ -1,9 +1,105 @@
-svg        = null;
-projection = null;
-centroids  = [];
-nodes      = [];
+CONFIG = {
+  scale: 500,
+  translate: [240, 300],
+  zoomContraints: [1, 3],
+  layers: {},
+  sources: {
+    countries: "data/countries.json",
+    centroids: "data/centroids.csv"
+  }
+};
 
-starts = [], ends = [];
+geoPath      = null,
+zoom         = 1,
+currentScale = null,
+svg          = null,
+projection   = null,
+nodes        = [];
+
+starts = [],
+ends   = [];
+
+// Draw some random parabolas
+function drawParabolas() {
+  _.each(starts, function(c) {
+    i = Math.round(Math.random(10) * (ends.length - 1));
+    drawParabola(getCoordinates(c), getCoordinates(ends[i]));
+  });
+}
+
+function addNode(j) {
+
+  var layer = CONFIG.layers.nodes;
+
+  var // coordinates
+  cx = starts[j][0],
+  cy = starts[j][1];
+
+  // Green dot
+  layer.append("circle")
+  .attr("r", 2.7)
+  .attr("class", "dot_green")
+  .attr('cx', cx)
+  .attr('cy', cy)
+  .attr("filter", "url(#blur.node)");
+
+  // Green glow
+  layer.append("circle")
+  .attr("class", "green_glow")
+  .attr("r", 9)
+  .attr('cx', cx)
+  .attr('cy', cy)
+  .attr("filter", "url(#blur.green)")
+  .on("click", function() {
+    d3.event.stopPropagation();
+
+    openCircle(d3.event.layerX, d3.event.layerY);
+
+  });
+}
+
+function openCircle(cx, cy) {
+  var $circle = $(".abc");
+
+  $circle.fadeOut(200, function() {
+
+    $(this).removeClass("zoom");
+
+    $(".arm").css("width", 0);
+    $(this).find("i").css("opacity", 0);
+    $(this).css({ top: cy + 20 , left: cx - 40 });
+
+    $(this).fadeIn(150, function() {
+      $(this).addClass("zoom");
+      showThumbs();
+    });
+
+  });
+}
+
+function showThumbs() {
+  var
+  $circle = $(".abc"),
+  i     = 0,
+  delay = 100,
+  speed = 100,
+  n = $circle.find(".arm").length;
+
+  $circle.find(".arm").each(function(i, c) {
+    i++;
+
+    var deg = (i * 360 / n) - 120;
+
+    $(c).css("-webkit-transform", "rotate(" + deg + "deg)");
+    $(c).find("i").css("-webkit-transform", "rotate(" + -1 * deg + "deg)");
+    $(c).delay(i * delay).animate({ width: 54 }, 250);
+
+    $(c).find("i").delay(i * delay).animate({
+      opacity: 1
+    }, speed);
+
+  });
+}
 
 function getCoordinates(coordinates) {
   return { x: coordinates[0], y: coordinates[1] };
@@ -15,11 +111,13 @@ function getCoordinates_(lat, lng) {
 }
 
 function zoomIn() {
-  //svg.attr("transform", "scale(2)");
+  console.log(svg);
+  svg.attr("transform", "scale(" + 2 + ")");
 }
 
 function zoomOut() {
-  //svg.attr("transform", "scale(.5)");
+  zoom = 1;
+  svg.attr("transform", "scale("+ zoom +")");
 }
 
 function translateAlong(path) {
@@ -77,6 +175,7 @@ function drawParabola(p1, p2) {
   .append("path")
   .attr("class", "parabola")
   .attr("d", line)
+  .attr("stroke-width", 1)
 
   function interpolate(d, p) {
     if (arguments.length < 2) p = t;
@@ -115,18 +214,52 @@ function drawParabola(p1, p2) {
   }
 
   var circle = svg
-  .append("g")
-  .attr("id", "beams")
+  .select("#beams")
   .append("circle")
-  .attr("r", 3)
   .attr("class", "beam")
-  .attr("filter", "url(#blur.beam)");
+  .attr("filter", "url(#blur.beam)")
+  .attr("r", 3);
 
   transition(circle, path);
 }
 
 function redraw() {
-  svg.attr("transform", "translate(" + d3.event.translate + ") scale(" + d3.event.scale + ")");
+
+  $(".abc").fadeOut(100);
+
+  var
+  scale     = d3.event.scale,
+  translate = d3.event.translate;
+
+  console.log(scale);
+
+  var r = 0;
+
+  svg.attr("transform", "translate(" + translate + ") scale(" + scale + ")");
+
+  svg.select("#beams")
+  .selectAll("circle")
+  .attr("r", 3/scale)
+
+  svg.select("#my_points2")
+  .selectAll(".dot")
+  .attr("r", .6/scale)
+
+  svg.select("#my_points")
+  .selectAll(".glow")
+  .attr("r", 3/scale)
+
+  svg.select("#nodes")
+  .selectAll(".green_glow")
+  .attr("r", 9/scale)
+
+  svg.select("#nodes")
+  .selectAll(".dot_green")
+  .attr("r", 2.7/scale)
+
+  svg.select("#lines")
+  .selectAll(".parabola")
+  .attr("stroke-width", 1 / scale)
 }
 
 function addBlur(name, deviation) {
@@ -149,37 +282,49 @@ function setupFilters(svg) {
 
 function start() {
 
+  $("#canvas").on("click", function() {
+    $(".abc").fadeOut(200);
+  });
+
   // The radius scale for the centroids.
   var r = d3.scale.sqrt()
   .domain([0, 1e6])
   .range([0, 10]);
 
-  // Our projection.
+  // Our projection
   projection = d3.geo.mercator()
-  .scale(500)
-  .translate([240, 300]);
+  .scale(CONFIG.scale)
+  .translate(CONFIG.translate);
 
   svg = d3.select("#canvas")
   .append("svg")
   .call(d3.behavior.zoom()
+  .scaleExtent(CONFIG.zoomContraints)
   .on("zoom", redraw))
   .append("g");
 
   setupFilters(svg);
 
-  svg.append("g").attr("id", "states");
-  svg.append("g").attr("id", "my_points");
-  svg.append("g").attr("id", "my_points2");
-  svg.append("g").attr("id", "lines");
+  // Layers
+  CONFIG.layers.states  = svg.append("g").attr("id", "states");
+  CONFIG.layers.points  = svg.append("g").attr("id", "my_points");
+  CONFIG.layers.points2 = svg.append("g").attr("id", "my_points2");
+  CONFIG.layers.lines   = svg.append("g").attr("id", "lines");
+  CONFIG.layers.beams   = svg.append("g").attr("id", "beams");
+  CONFIG.layers.nodes   = svg.append("g").attr("id", "nodes");
 
-  d3.json("data/countries.json", function(collection) {
+  d3.json(CONFIG.sources.countries, function(collection) {
+
+    geoPath = d3.geo.path().projection(projection)
+
     svg.select("#states")
     .selectAll("path")
     .data(collection.features)
     .enter().append("path")
-    .attr("d", d3.geo.path().projection(projection));
+    .attr("d", geoPath);
 
-    d3.csv("data/centroids.csv", function(collection) {
+    d3.csv(CONFIG.sources.centroids, function(collection) {
+
       svg.select("#my_points")
       .selectAll("circle")
       .data(collection)
@@ -189,19 +334,14 @@ function start() {
       .attr("class", "glow")
       .attr('cx', function(d) { return projection([d.LONG, d.LAT])[0]; } )
       .attr('cy', function(d) { return projection([d.LONG, d.LAT])[1]; } )
-      .attr("r", 2)
-    });
-
-    d3.csv("data/centroids.csv", function(collection) {
-
-      centroids = collection;
+      .attr("r", 3)
 
       svg.select("#my_points2")
       .selectAll("circle")
       .data(collection)
       .enter()
       .append("circle")
-      .attr("class", "glow")
+      .attr("class", "dot")
       .attr('cx', function(d, i) {
 
         var p = Math.round(Math.random()*10);
@@ -217,57 +357,15 @@ function start() {
 
       })
       .attr('cy', function(d, i) { return projection([d.LONG, d.LAT])[1]; })
-      .attr("r", .2);
+      .attr("r", .6);
 
-      _.each(starts, function(c) {
-        i = Math.round(Math.random(10) * (ends.length - 1));
-        drawParabola(getCoordinates(c), getCoordinates(ends[i]));
-      });
+      drawParabolas();
 
-      function addNode(c, j) {
-
-      var cx = starts[j][0];
-      var cy = starts[j][1];
-
-        c.append("circle").attr("r", 2.7)
-        .attr("class", "prueba")
-        .attr('cx', cx)
-        .attr('cy', cy)
-        .attr("filter", "url(#blur.node)");
-
-        c.append("circle")
-        .attr("class", "green")
-        .attr("r", 9)
-        .attr('cx', cx)
-        .attr('cy', cy)
-        .attr("filter", "url(#blur.green)")
-        .on("click", function(d) {
-
-          $(".abc").fadeOut(150, function() {
-            $(".abc").removeClass("zoom");
-            $(".abc").css({ width: 20, height: 20, top: cy + 69, left: cx + 9 });
-            $(".abc").fadeIn(150, function() {
-              $(".abc").addClass("zoom");
-            });
-          });
-
-        });
-
-      }
-
-      var c = svg
-      .append("g")
-      .attr("id", "my_points4");
-
-      addNode(c, 2);
-      addNode(c, 3);
-      addNode(c, 5);
-      addNode(c, 13);
+      addNode(2);
+      addNode(3);
+      addNode(5);
+      addNode(13);
 
     });
-
-
-
-
   });
 }
