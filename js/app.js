@@ -9,6 +9,8 @@ CONFIG = {
   }
 };
 
+zoom = null,
+scale = 1,
 r = 0,
 t = .5,
 last = 0,
@@ -38,13 +40,6 @@ function addNode(j) {
   cx = starts[j][0],
   cy = starts[j][1];
 
-  // Green dot
-  layer.append("circle")
-  .attr("r", 2.7)
-  .attr("class", "dot_green")
-  .attr('cx', cx)
-  .attr('cy', cy)
-  .attr("filter", "url(#blur.node)");
 
   // Green glow
   layer.append("circle")
@@ -53,15 +48,25 @@ function addNode(j) {
   .attr('cx', cx)
   .attr('cy', cy)
   .attr("filter", "url(#blur.green)")
+
+  // Green dot
+  layer.append("circle")
+  .attr("r", 2.7)
+  .attr("class", "dot_green")
+  .attr('cx', cx)
+  .attr('cy', cy)
+  .attr("filter", "url(#blur.node)")
   .on("click", function() {
     d3.event.stopPropagation();
 
-  //projection = d3.geo.mercator()
-  //.scale(CONFIG.scale)
-  //.translate(CONFIG.translate);
+    // Coordinates of the click adjusted to the zoom
+    // level & translation vector
+    var
+    t = zoom.translate(),
+    x = (zoom.scale() * cx) + t[0],
+    y = (zoom.scale() * cy) + t[1];
 
-    //console.log(svg.scale(), d3.event, d3.event.layerX, cx);
-    openCircle(cx, cy);
+    openCircle(x, y);
 
   });
 }
@@ -77,7 +82,7 @@ function openCircle(cx, cy) {
     $(this).find("i").css("opacity", 0);
     $(this).css({ top: cy + 20, left: cx - 40 });
 
-    $(this).fadeIn(150, function() {
+    $(this).fadeIn(200, "easeInQuad", function() {
       $(this).addClass("zoom");
       showThumbs();
     });
@@ -233,9 +238,8 @@ function drawParabola(p1, p2) {
 
 function redraw() {
 
-  $(".radial-menu").fadeOut(100);
+  $(".radial-menu").fadeOut(200, "easeOutQuad");
 
-  var
   scale     = d3.event.scale,
   translate = d3.event.translate;
 
@@ -288,13 +292,18 @@ function setupFilters(svg) {
 
 
 function update() {
+
   r = r + .1;
-  var p = Math.abs(Math.sin(t));
+
+  var
+  p       = Math.abs(Math.sin(t)),
+  radius  = 6 + p*4/scale,
+  opacity = p;
 
   svg.select("#nodes")
   .selectAll(".green_glow")
-  .attr("r", 6 + p*4)
-  .attr("opacity", Math.round(p*2));
+  .attr("r", radius)
+  .attr("opacity", opacity);
 }
 
 function start() {
@@ -319,10 +328,11 @@ function start() {
   .scale(CONFIG.scale)
   .translate(CONFIG.translate);
 
+  zoom = d3.behavior.zoom().scaleExtent(CONFIG.zoomContraints).on("zoom", redraw);
+
   svg = d3.select("#canvas")
   .append("svg")
-  .call(d3.behavior.zoom().scaleExtent(CONFIG.zoomContraints)
-  .on("zoom", redraw))
+  .call(zoom)
   .append("g");
 
   setupFilters(svg);

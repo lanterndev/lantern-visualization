@@ -217,7 +217,6 @@ i { // as in "icon"
   stroke:1;
   fill: #AAD092;
   opacity:.15;
-  cursor: pointer;
   z-index: 1000;
 }
 
@@ -225,6 +224,7 @@ i { // as in "icon"
   stroke:1;
   fill: #AAD092;
   opacity:1;
+  cursor: pointer;
 
   z-index: 1000;
 }
