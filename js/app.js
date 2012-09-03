@@ -9,6 +9,9 @@ CONFIG = {
   }
 };
 
+r = 0,
+t = .5,
+last = 0,
 geoPath      = null,
 zoom         = 1,
 currentScale = null,
@@ -53,13 +56,18 @@ function addNode(j) {
   .on("click", function() {
     d3.event.stopPropagation();
 
-    openCircle(d3.event.layerX, d3.event.layerY);
+  //projection = d3.geo.mercator()
+  //.scale(CONFIG.scale)
+  //.translate(CONFIG.translate);
+
+    //console.log(svg.scale(), d3.event, d3.event.layerX, cx);
+    openCircle(cx, cy);
 
   });
 }
 
 function openCircle(cx, cy) {
-  var $circle = $(".abc");
+  var $circle = $(".radial-menu");
 
   $circle.fadeOut(200, function() {
 
@@ -67,7 +75,7 @@ function openCircle(cx, cy) {
 
     $(".arm").css("width", 0);
     $(this).find("i").css("opacity", 0);
-    $(this).css({ top: cy + 20 , left: cx - 40 });
+    $(this).css({ top: cy + 20, left: cx - 40 });
 
     $(this).fadeIn(150, function() {
       $(this).addClass("zoom");
@@ -79,7 +87,7 @@ function openCircle(cx, cy) {
 
 function showThumbs() {
   var
-  $circle = $(".abc"),
+  $circle = $(".radial-menu"),
   i     = 0,
   delay = 100,
   speed = 100,
@@ -92,11 +100,12 @@ function showThumbs() {
 
     $(c).css("-webkit-transform", "rotate(" + deg + "deg)");
     $(c).find("i").css("-webkit-transform", "rotate(" + -1 * deg + "deg)");
-    $(c).delay(i * delay).animate({ width: 54 }, 250);
+    $(c).delay(i * delay).animate({ width: 54 }, { duration: 250, easing: "easeOutQuad" });
 
     $(c).find("i").delay(i * delay).animate({
       opacity: 1
-    }, speed);
+    },
+    { duration: speed, easing: "easeOutQuad" });
 
   });
 }
@@ -111,7 +120,6 @@ function getCoordinates_(lat, lng) {
 }
 
 function zoomIn() {
-  console.log(svg);
   svg.attr("transform", "scale(" + 2 + ")");
 }
 
@@ -225,13 +233,11 @@ function drawParabola(p1, p2) {
 
 function redraw() {
 
-  $(".abc").fadeOut(100);
+  $(".radial-menu").fadeOut(100);
 
   var
   scale     = d3.event.scale,
   translate = d3.event.translate;
-
-  console.log(scale);
 
   var r = 0;
 
@@ -280,10 +286,27 @@ function setupFilters(svg) {
   addBlur("green",   1.9);
 }
 
+
+function update() {
+  r = r + .1;
+  var p = Math.abs(Math.sin(t));
+
+  svg.select("#nodes")
+  .selectAll(".green_glow")
+  .attr("r", 6 + p*4)
+  .attr("opacity", Math.round(p*2));
+}
+
 function start() {
 
+  d3.timer(function(elapsed) {
+    t = (t + (elapsed - last) / 500) ;
+    last = elapsed;
+    update();
+  });
+
   $("#canvas").on("click", function() {
-    $(".abc").fadeOut(200);
+    $(".radial-menu").fadeOut(200);
   });
 
   // The radius scale for the centroids.
@@ -298,8 +321,7 @@ function start() {
 
   svg = d3.select("#canvas")
   .append("svg")
-  .call(d3.behavior.zoom()
-  .scaleExtent(CONFIG.zoomContraints)
+  .call(d3.behavior.zoom().scaleExtent(CONFIG.zoomContraints)
   .on("zoom", redraw))
   .append("g");
 
