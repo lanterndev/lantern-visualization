@@ -223,6 +223,15 @@ VIS.prototype.openCircle = function(cx, cy) {
 
     $(this).removeClass("zoom");
 
+    $(this).find(".arm").remove();
+
+    var thumbCount = 3 + Math.round(Math.random() * 7);
+
+    for (var i = 0; i <= thumbCount; i++) {
+      var $arm = $("<div class='arm'><i></i></div>");
+      $(this).append($arm);
+    };
+
     $(".arm").css("width", 0);
     $(this).find("i").css("opacity", 0);
     $(this).css({ top: cy + 20, left: cx - 40 });
@@ -611,9 +620,9 @@ VIS.prototype.loadCentroids = function() {
 
     that.addUser(center);
 
-    that.connectNode(center);
-    that.connectNode(center);
-    that.connectNode(center);
+    for (var i = 0; i<= 2 + Math.round(Math.random() * 3); i++) {
+      that.connectNode(center);
+    }
 
   });
 }
