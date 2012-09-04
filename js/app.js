@@ -235,8 +235,6 @@ function zoomOut() {
   x = -250 * (zoom.scale() - 1),
   y = -250 * (zoom.scale() - 1);
 
-  console.log(x, tx);
-
   zoom.translate([x, y]);
 
   svg
@@ -294,7 +292,6 @@ function transition(circle, path) {
 }
 
 function drawParabola(p1, p2, c, animated) {
-console.log(animated);
 
   var
   delta  = .03,
