@@ -11,6 +11,11 @@ i { // as in "icon"
   display: block;
 }
 
+// Sprites
+/*$icons-bullet-orange-spacing: 25px;*/
+
+@import "icons/*.png"; /**/
+
 .chrome { // Basic chrome
 
   $chromeWidth:        520px;
@@ -41,7 +46,7 @@ i { // as in "icon"
   margin: auto;
   overflow:hidden;
 
-  background: url(../img/bg-chrome.png) no-repeat;
+  @include icons-sprite(bg-chrome);
 
   #canvas {
     @include position($headerTop + $headerHeight - $headerShadowHeight, false, false, $shadowWidth);
@@ -53,13 +58,13 @@ i { // as in "icon"
   header {
     @include position($headerTop, false, false, $headerLeft);
     @include size($headerWidth, $headerHeight);
-    background: url(../img/bg-chrome-header.png) no-repeat;
+    @include icons-sprite(bg-chrome-header);
   }
 
   footer {
     @include position(false, false, $footerBottom, $footerLeft);
     @include size($footerWidth, $footerHeight);
-    background: url(../img/bg-chrome-footer.png) no-repeat;
+    @include icons-sprite(bg-chrome-footer);
   }
 
   #lines {
@@ -97,7 +102,7 @@ i { // as in "icon"
 
         &.ok i {
           @include size(19px);
-          background: url(../img/status-ok.png) no-repeat;
+          @include icons-sprite(status-ok);
         }
 
       }
@@ -143,12 +148,12 @@ i { // as in "icon"
       &.disabled a { cursor: default; }
       &.disabled a:hover { opacity: .5; }
 
-      &.zoom_out  a { background: url(../img/minus.png)       no-repeat 50% 50%; }
-      &.magnifier a { background: url(../img/magnifier.png)   no-repeat 50% 50%; }
-      &.zoom_in   a { background: url(../img/plus.png)        no-repeat 50% 50%; }
-      &.graph     a { background: url(../img/speedometer.png) no-repeat 50% 50%; }
-      &.users     a { background: url(../img/users.png)       no-repeat 50% 50%; }
-      &.settings  a { background: url(../img/gears.png)       no-repeat 50% 50%; }
+      &.zoom_out  a { background: url(../img/icons/minus.png)       no-repeat 50% 50%; }
+      &.magnifier a { background: url(../img/icons/magnifier.png)   no-repeat 50% 50%; }
+      &.zoom_in   a { background: url(../img/icons/plus.png)        no-repeat 50% 50%; }
+      &.graph     a { background: url(../img/icons/speedometer.png) no-repeat 50% 50%; }
+      &.users     a { background: url(../img/icons/users.png)       no-repeat 50% 50%; }
+      &.settings  a { background: url(../img/icons/gears.png)       no-repeat 50% 50%; }
 
       &:first-child { @include border-radius(3px 0 0 3px); }
       &:last-child  { @include border-radius(0 3px 3px 0); }
@@ -181,8 +186,7 @@ i { // as in "icon"
   i {
     margin: 0 auto 10px auto;
     @include size(16px, 17px);
-
-    background: url(../img/connected.png) no-repeat;
+    @include icons-sprite(connected);
   }
 
 }
@@ -290,7 +294,7 @@ circle {
 
   /*pointer-events: none;*/
 
-  background: url(../img/circle.png) no-repeat;
+  @include icons-sprite(circle);
 
   z-index: 5500;
 
