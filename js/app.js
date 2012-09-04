@@ -31,13 +31,22 @@ nodes        = [];
 starts = [],
 ends   = [];
 
-function connectNode(origin) {
+function connectNode(center) {
 
   var j = 100;
-  _.each(starts.slice(0, 10), function(c) {
+
+  _.each(starts.slice(0, 4), function(c) {
     j++;
-    i = Math.round(Math.random() * (ends.length - 1));
-    drawParabola(j, { x: origin[0], y: origin[1] }, getCoordinates(ends[i]), "parabola");
+
+    var
+    i      = Math.round(Math.random() * (ends.length - 1)),
+    origin = { x: center[0], y: center[1] },
+    end    = getCoordinates(ends[i]);
+
+    drawParabola(j, origin, end, "parabola");
+
+    addNode(end);
+
   });
 
 }
@@ -47,8 +56,20 @@ function drawParabolas(n) {
   var j = 0;
   _.each(starts.slice(0, n), function(c) {
     j++;
-    i = Math.round(Math.random() * (ends.length - 1));
-    drawParabola(j, getCoordinates(c), getCoordinates(ends[i]), "parabola_light");
+
+    var i = Math.round(Math.random() * (ends.length - 1));
+    var p = Math.round(Math.random() * (ends.length - 1));
+    var q = Math.round(Math.random() * (ends.length - 1));
+
+    var origin = getCoordinates(c);
+    var end    = getCoordinates(ends[i]);
+    var anotherPoint = getCoordinates(ends[p]);
+    var anotherPoint2 = getCoordinates(ends[q]);
+
+    drawParabola(j    , origin, end, "parabola_light");
+    drawParabola(j + 1, end, anotherPoint, "parabola_light");
+    drawParabola(j + 2, end, anotherPoint2, "parabola_light");
+
   });
 
 }
@@ -80,14 +101,13 @@ function addUser() {
   return [cx, cy];
 }
 
-function addNode(j) {
+function addNode(coordinates) {
 
   var layer = CONFIG.layers.nodes;
 
   var // coordinates
-  cx = starts[j][0],
-  cy = starts[j][1];
-
+  cx = coordinates.x,
+  cy = coordinates.y;
 
   // Green glow
   layer.append("circle")
@@ -274,8 +294,12 @@ function transition(id, circle, path) {
 function drawParabola(id, p1, p2, c) {
 
   var
-  delta  = .05,
-  points = [{x:p1.x, y:p1.y}, {x:Math.abs(p1.x + p2.x)/2, y: Math.min(p2.y, p1.y)-Math.abs(p2.x - p1.x)*0.5 }, { x: p2.x, y: p2.y}],
+  delta  = .03,
+  points = [
+    { x: p1.x, y: p1.y},
+    { x: Math.abs(p1.x + p2.x)/2, y: Math.min(p2.y, p1.y) - Math.abs(p2.x - p1.x) * 0.5 },
+    { x: p2.x, y: p2.y}
+  ],
 
   line = d3.svg.line()
   .x(function(d) { return d.x; } )
@@ -521,16 +545,11 @@ function start() {
       .attr('cy', function(d, i) { return projection([d.LONG, d.LAT])[1]; })
       .attr("r", .6);
 
-      drawParabolas(5);
+      drawParabolas(3);
 
       var center = addUser();
 
       connectNode(center);
-
-      //addNode(2);
-      //addNode(3);
-      //addNode(5);
-      //addNode(13);
 
     });
   });
