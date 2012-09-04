@@ -1,5 +1,7 @@
 CONFIG = {
   scale: 500,
+
+  //translate: [0, 0],
   translate: [240, 300],
   zoomContraints: [1, 3],
   layers: {},
@@ -8,6 +10,11 @@ CONFIG = {
     centroids: "data/centroids.csv"
   }
 };
+
+direction = [];
+
+tx = 0;
+ty = 0;
 
 zoom = null,
 scale = 1,
@@ -25,11 +32,15 @@ starts = [],
 ends   = [];
 
 // Draw some random parabolas
-function drawParabolas() {
-  _.each(starts, function(c) {
-    i = Math.round(Math.random(10) * (ends.length - 1));
-    drawParabola(getCoordinates(c), getCoordinates(ends[i]));
+function drawParabolas(n) {
+
+var j = 0;
+  _.each(starts.slice(0, n), function(c) {
+  j++;
+    i = Math.round(Math.random() * (ends.length - 1));
+    drawParabola(j, getCoordinates(c), getCoordinates(ends[i]));
   });
+
 }
 
 function addNode(j) {
@@ -92,16 +103,17 @@ function openCircle(cx, cy) {
 
 function showThumbs() {
   var
-  $circle = $(".radial-menu"),
-  i     = 0,
-  delay = 100,
-  speed = 100,
+  $circle    = $(".radial-menu"),
+  i          = 0,
+  delay      = 100,
+  speed      = 100,
+  initialDeg = 120,
   n = $circle.find(".arm").length;
 
   $circle.find(".arm").each(function(i, c) {
     i++;
 
-    var deg = (i * 360 / n) - 120;
+    var deg = (i * 360 / n) - initialDeg;
 
     $(c).css("-webkit-transform", "rotate(" + deg + "deg)");
     $(c).find("i").css("-webkit-transform", "rotate(" + -1 * deg + "deg)");
@@ -125,35 +137,64 @@ function getCoordinates_(lat, lng) {
 }
 
 function zoomIn() {
-  svg.attr("transform", "scale(" + 2 + ")");
+
+  var
+  scale = zoom.scale(),
+  t     = zoom.translate();
+
+  zoom.scale(scale + .5);
+
+  var
+  x = -250 * (zoom.scale() - 1),
+  y = -250 * (zoom.scale() - 1);
+
+  console.log(x, tx);
+
+  zoom.translate([x, y]);
+
+  svg
+  .transition()
+  .duration(500)
+  .attr("transform", "translate(" + x + "," + y + ") scale(" + zoom.scale() + ")");
+
+  updateLines(zoom.scale() + .2);
+
 }
 
 function zoomOut() {
-  zoom = 1;
-  svg.attr("transform", "scale("+ zoom +")");
+  zoom.scale(zoom.scale() - .1);
+  svg.attr("transform", "scale(" + zoom.scale() + ")");
 }
 
-function translateAlong(path) {
+function translateAlong(id, path) {
   var l = path.getTotalLength();
   return function(d, i, a) {
     return function(t) {
-      var p = path.getPointAtLength(t * l);
+
+      var p = null;
+
+      if (direction[id] == 1) p = path.getPointAtLength((1 - t) * l);
+      else p = path.getPointAtLength(( t) * l);
+
       return "translate(" + p.x + "," + p.y + ")";
     };
   };
 }
 
-function transition(circle, path) {
+function transition(id, circle, path) {
+
+  if (!direction[id]) direction[id] = 1;
 
   circle
   .transition()
   .duration(800)
   .style("opacity", .25)
   .transition()
-  .duration(Math.round(Math.random(50) * 2500))
+  //.duration(Math.round(Math.random(50) * 1200))
+  .duration(1500)
   .delay(Math.round(Math.random(100) * 2500))
   .style("opacity", .25)
-  .attrTween("transform", translateAlong(path.node()))
+  .attrTween("transform", translateAlong(id, path.node()))
   .each("end", function(t) {
 
     circle
@@ -161,13 +202,16 @@ function transition(circle, path) {
     .duration(500)
     .style("opacity", 0)
     .each("end", function() {
-      transition(circle, path);
+
+      direction[id] = -1*direction[id]; // changes the direction
+      transition(id, circle, path);
+
     });
 
   });
 }
 
-function drawParabola(p1, p2) {
+function drawParabola(id, p1, p2) {
 
   var
   delta  = .05,
@@ -233,7 +277,7 @@ function drawParabola(p1, p2) {
   .attr("filter", "url(#blur.beam)")
   .attr("r", 3);
 
-  transition(circle, path);
+  transition(id, circle, path);
 }
 
 function redraw() {
@@ -242,10 +286,20 @@ function redraw() {
 
   scale     = d3.event.scale,
   translate = d3.event.translate;
+  t         = zoom.translate();
+
+  tx = t[0];
+  ty = t[1];
+  console.log(tx, ty);
 
   var r = 0;
 
   svg.attr("transform", "translate(" + translate + ") scale(" + scale + ")");
+
+  updateLines(scale);
+}
+
+function updateLines(scale) {
 
   svg.select("#beams")
   .selectAll("circle")
@@ -270,6 +324,7 @@ function redraw() {
   svg.select("#lines")
   .selectAll(".parabola")
   .attr("stroke-width", 1 / scale)
+
 }
 
 function addBlur(name, deviation) {
@@ -290,7 +345,6 @@ function setupFilters(svg) {
   addBlur("green",   1.9);
 }
 
-
 function update() {
 
   r = r + .1;
@@ -308,11 +362,11 @@ function update() {
 
 function start() {
 
-  d3.timer(function(elapsed) {
-    t = (t + (elapsed - last) / 500) ;
-    last = elapsed;
-    update();
-  });
+  //d3.timer(function(elapsed) {
+    //t = (t + (elapsed - last) / 500) ;
+    //last = elapsed;
+    //update();
+  //});
 
   $("#canvas").on("click", function() {
     $(".radial-menu").fadeOut(200);
@@ -391,7 +445,7 @@ function start() {
       .attr('cy', function(d, i) { return projection([d.LONG, d.LAT])[1]; })
       .attr("r", .6);
 
-      drawParabolas();
+      drawParabolas(10);
 
       addNode(2);
       addNode(3);
