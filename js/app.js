@@ -31,16 +31,53 @@ nodes        = [];
 starts = [],
 ends   = [];
 
+function connectNode(origin) {
+
+  var j = 100;
+  _.each(starts.slice(0, 10), function(c) {
+    j++;
+    i = Math.round(Math.random() * (ends.length - 1));
+    drawParabola(j, { x: origin[0], y: origin[1] }, getCoordinates(ends[i]), "parabola");
+  });
+
+}
 // Draw some random parabolas
 function drawParabolas(n) {
 
-var j = 0;
+  var j = 0;
   _.each(starts.slice(0, n), function(c) {
-  j++;
+    j++;
     i = Math.round(Math.random() * (ends.length - 1));
-    drawParabola(j, getCoordinates(c), getCoordinates(ends[i]));
+    drawParabola(j, getCoordinates(c), getCoordinates(ends[i]), "parabola_light");
   });
 
+}
+
+function addUser() {
+
+  var layer = CONFIG.layers.nodes;
+  var j = Math.round(Math.random()*(starts.length-1));
+
+  var // coordinates
+  cx = starts[j][0],
+  cy = starts[j][1];
+
+
+   //Red glow
+  //layer.append("circle")
+  //.attr("class", "red_glow")
+  //.attr("r", 5)
+  //.attr('cx', cx)
+  //.attr('cy', cy)
+  //.attr("filter", "url(#blur.red)")
+
+  layer.append("circle")
+  .attr("class", "hollow")
+  .attr("r", 4)
+  .attr('cx', cx)
+  .attr('cy', cy)
+
+  return [cx, cy];
 }
 
 function addNode(j) {
@@ -234,7 +271,7 @@ function transition(id, circle, path) {
   });
 }
 
-function drawParabola(id, p1, p2) {
+function drawParabola(id, p1, p2, c) {
 
   var
   delta  = .05,
@@ -253,7 +290,7 @@ function drawParabola(id, p1, p2) {
   .data(getCurve)
   .enter()
   .append("path")
-  .attr("class", "parabola")
+  .attr("class", c)
   .attr("d", line)
   .attr("stroke-width", 1)
 
@@ -309,11 +346,10 @@ function redraw() {
 
   scale     = d3.event.scale,
   translate = d3.event.translate;
-  t         = zoom.translate();
+  var t     = zoom.translate();
 
   tx = t[0];
   ty = t[1];
-  console.log(tx, ty);
 
   var r = 0;
 
@@ -326,6 +362,15 @@ function redraw() {
 }
 
 function updateLines(scale) {
+
+  //svg.select("#nodes")
+  //.selectAll(".red_glow")
+  //.attr("r", 5/scale)
+
+  svg.select("#nodes")
+  .selectAll(".hollow")
+  .attr("r", 6/scale)
+  .style("stroke-width", 1.5/scale)
 
   svg.select("#beams")
   .selectAll("circle")
@@ -346,6 +391,10 @@ function updateLines(scale) {
   svg.select("#nodes")
   .selectAll(".dot_green")
   .attr("r", 2.7/scale)
+
+  svg.select("#lines")
+  .selectAll(".parabola_light")
+  .attr("stroke-width", 1 / scale)
 
   svg.select("#lines")
   .selectAll(".parabola")
@@ -369,6 +418,7 @@ function setupFilters(svg) {
   addBlur("beam",    .9);
   addBlur("node",    .35);
   addBlur("green",   1.9);
+  addBlur("red",     0.5);
 }
 
 function update() {
@@ -471,12 +521,16 @@ function start() {
       .attr('cy', function(d, i) { return projection([d.LONG, d.LAT])[1]; })
       .attr("r", .6);
 
-      drawParabolas(10);
+      drawParabolas(5);
 
-      addNode(2);
-      addNode(3);
-      addNode(5);
-      addNode(13);
+      var center = addUser();
+
+      connectNode(center);
+
+      //addNode(2);
+      //addNode(3);
+      //addNode(5);
+      //addNode(13);
 
     });
   });

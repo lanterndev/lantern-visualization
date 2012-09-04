@@ -240,11 +240,18 @@ circle {
   opacity:.7;
 }
 
-circle.hollow {
-  stroke:#FF6666;
-  stroke-width:2;
+.red_glow {
   fill:none;
-  opacity:.7;
+  stroke:#FF6666;
+  opacity:.3;
+  z-index: 1000;
+}
+
+.hollow {
+  stroke:#FF6666;
+  stroke-width:1.5;
+  fill:none;
+  opacity:.9;
 }
 
 .glow {
@@ -257,6 +264,13 @@ circle.hollow {
   stroke-width:0.3;
   fill:black;
   opacity:.3;
+}
+
+.parabola_light {
+  fill: none;
+  stroke: $cWhite;
+  opacity:.2;
+  stroke-linecap: round;
 }
 
 .parabola {
