@@ -62,7 +62,7 @@ function getRandomCenter() {
 function connectNode(origin) {
   var end = getRandomCenter();
 
-  drawParabola(origin, end, "parabola");
+  drawParabola(origin, end, "parabola", true);
   addNode(end);
 }
 
@@ -80,11 +80,11 @@ function drawParabolas(n) {
     origin = getCoordinates(c),
     end    = getRandomCenter();
 
-    drawParabola(origin, end, "parabola_light");
+    drawParabola(origin, end, "parabola_light", false);
 
     for (i = 0; i <= Math.round(Math.random()*5); i++) {
       var randomPoint = getRandomCenter();
-      drawParabola(end, randomPoint, "parabola_light");
+      drawParabola(end, randomPoint, "parabola_light", false);
       end = randomPoint;
     }
 
@@ -293,7 +293,8 @@ function transition(circle, path) {
   });
 }
 
-function drawParabola(p1, p2, c) {
+function drawParabola(p1, p2, c, animated) {
+console.log(animated);
 
   var
   delta  = .03,
@@ -357,14 +358,17 @@ function drawParabola(p1, p2, c) {
     return [curve];
   }
 
-  var circle = svg
-  .select("#beams")
-  .append("circle")
-  .attr("class", "beam")
-  .attr("filter", "url(#blur.beam)")
-  .attr("r", 3);
+  if (animated) {
+    var circle = svg
+    .select("#beams")
+    .append("circle")
+    .attr("class", "beam")
+    .attr("filter", "url(#blur.beam)")
+    .attr("r", 3);
 
-  transition(circle, path);
+    transition(circle, path);
+  }
+
 }
 
 function redraw() {
