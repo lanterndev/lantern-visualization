@@ -506,9 +506,14 @@ function start() {
 
     svg.select("#states")
     .selectAll("path")
+
     .data(collection.features)
     .enter().append("path")
-    .attr("d", geoPath);
+    .attr("d", geoPath)
+    .transition()
+    .duration(700)
+    .style("opacity", .3)
+
 
     d3.csv(CONFIG.sources.centroids, function(collection) {
 
