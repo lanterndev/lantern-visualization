@@ -1,7 +1,5 @@
 CONFIG = {
   scale: 500,
-
-  //translate: [0, 0],
   translate: [240, 300],
   zoomContraints: [1, 3],
   layers: {},
@@ -31,25 +29,42 @@ nodes        = [];
 starts = [],
 ends   = [];
 
+function GUID ()
+{
+    var S4 = function ()
+    {
+        return Math.floor(
+                Math.random() * 0x10000 /* 65536 */
+            ).toString(16);
+    };
+
+    return (
+            S4() + S4() + "-" +
+            S4() + "-" +
+            S4() + "-" +
+            S4() + "-" +
+            S4() + S4() + S4()
+        );
+}
+
+function getRandomCenter() {
+  var i = Math.round(Math.random() * (ends.length - 1));
+  return getCoordinates(ends[i]);
+}
+
 function connectNode(center) {
 
   var j = 100;
 
-  _.each(starts.slice(0, 4), function(c) {
-    j++;
+  var
+  origin = getCoordinates(center),
+  end    = getRandomCenter();
 
-    var
-    i      = Math.round(Math.random() * (ends.length - 1)),
-    origin = { x: center[0], y: center[1] },
-    end    = getCoordinates(ends[i]);
+  drawParabola(origin, end, "parabola");
 
-    drawParabola(j, origin, end, "parabola");
-
-    addNode(end);
-
-  });
-
+  addNode(end);
 }
+
 // Draw some random parabolas
 function drawParabolas(n) {
 
@@ -66,9 +81,9 @@ function drawParabolas(n) {
     var anotherPoint = getCoordinates(ends[p]);
     var anotherPoint2 = getCoordinates(ends[q]);
 
-    drawParabola(j    , origin, end, "parabola_light");
-    drawParabola(j + 1, end, anotherPoint, "parabola_light");
-    drawParabola(j + 2, end, anotherPoint2, "parabola_light");
+    drawParabola(origin, end, "parabola_light");
+    drawParabola(end, anotherPoint, "parabola_light");
+    drawParabola(end, anotherPoint2, "parabola_light");
 
   });
 
@@ -188,13 +203,7 @@ function getCoordinates(coordinates) {
   return { x: coordinates[0], y: coordinates[1] };
 }
 
-function getCoordinates_(lat, lng) {
-  var xy = projection([lat, lng]);
-  return { x: xy[0], y: xy[1] };
-}
-
 function zoomIn() {
-
 
   var
   scale = zoom.scale(),
@@ -254,15 +263,16 @@ function translateAlong(id, path) {
       var p = null;
 
       if (direction[id] == 1) p = path.getPointAtLength((1 - t) * l);
-      else p = path.getPointAtLength(( t) * l);
+      else p = path.getPointAtLength(t * l);
 
       return "translate(" + p.x + "," + p.y + ")";
     };
   };
 }
 
-function transition(id, circle, path) {
+function transition(circle, path) {
 
+  var id = path.attr("id");
   if (!direction[id]) direction[id] = 1;
 
   circle
@@ -284,14 +294,14 @@ function transition(id, circle, path) {
     .each("end", function() {
 
       direction[id] = -1*direction[id]; // changes the direction
-      transition(id, circle, path);
+      transition(circle, path);
 
     });
 
   });
 }
 
-function drawParabola(id, p1, p2, c) {
+function drawParabola(p1, p2, c) {
 
   var
   delta  = .03,
@@ -315,6 +325,7 @@ function drawParabola(id, p1, p2, c) {
   .enter()
   .append("path")
   .attr("class", c)
+  .attr("id", GUID())
   .attr("d", line)
   .attr("stroke-width", 1)
 
@@ -361,7 +372,7 @@ function drawParabola(id, p1, p2, c) {
   .attr("filter", "url(#blur.beam)")
   .attr("r", 3);
 
-  transition(id, circle, path);
+  transition(circle, path);
 }
 
 function redraw() {
