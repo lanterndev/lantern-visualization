@@ -52,16 +52,10 @@ function getRandomCenter() {
   return getCoordinates(ends[i]);
 }
 
-function connectNode(center) {
-
-  var j = 100;
-
-  var
-  origin = getCoordinates(center),
-  end    = getRandomCenter();
+function connectNode(origin) {
+  var end = getRandomCenter();
 
   drawParabola(origin, end, "parabola");
-
   addNode(end);
 }
 
@@ -69,17 +63,14 @@ function connectNode(center) {
 function drawParabolas(n) {
 
   var j = 0;
+
   _.each(starts.slice(0, n), function(c) {
     j++;
 
-    var i = Math.round(Math.random() * (ends.length - 1));
-    var p = Math.round(Math.random() * (ends.length - 1));
-    var q = Math.round(Math.random() * (ends.length - 1));
-
-    var origin = getCoordinates(c);
-    var end    = getCoordinates(ends[i]);
-    var anotherPoint = getCoordinates(ends[p]);
-    var anotherPoint2 = getCoordinates(ends[q]);
+    var origin        = getCoordinates(c);
+    var end           = getRandomCenter();
+    var anotherPoint  = getRandomCenter();
+    var anotherPoint2 = getRandomCenter();
 
     drawParabola(origin, end, "parabola_light");
     drawParabola(end, anotherPoint, "parabola_light");
@@ -89,23 +80,19 @@ function drawParabolas(n) {
 
 }
 
-function addUser() {
 
-  var layer = CONFIG.layers.nodes;
-  var j = Math.round(Math.random()*(starts.length-1));
+/**
+ *
+ * Shows the position of the user
+ *
+ */
 
-  var // coordinates
-  cx = starts[j][0],
-  cy = starts[j][1];
+function addUser(center) {
 
-
-   //Red glow
-  //layer.append("circle")
-  //.attr("class", "red_glow")
-  //.attr("r", 5)
-  //.attr('cx', cx)
-  //.attr('cy', cy)
-  //.attr("filter", "url(#blur.red)")
+  var
+  layer = CONFIG.layers.nodes,
+  cx = center.x,
+  cy = center.y
 
   layer.append("circle")
   .attr("class", "hollow")
@@ -113,7 +100,6 @@ function addUser() {
   .attr('cx', cx)
   .attr('cy', cy)
 
-  return [cx, cy];
 }
 
 function addNode(coordinates) {
@@ -558,8 +544,10 @@ function start() {
 
       drawParabolas(3);
 
-      var center = addUser();
-
+      var center = getRandomCenter();
+      addUser(center);
+      connectNode(center);
+      connectNode(center);
       connectNode(center);
 
     });
