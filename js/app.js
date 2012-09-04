@@ -388,11 +388,11 @@ function update() {
 
 function start() {
 
-  //d3.timer(function(elapsed) {
-    //t = (t + (elapsed - last) / 500) ;
-    //last = elapsed;
-    //update();
-  //});
+  d3.timer(function(elapsed) {
+    t = (t + (elapsed - last) / 500) ;
+    last = elapsed;
+    update();
+  });
 
   $("#canvas").on("click", function() {
     $(".radial-menu").fadeOut(200);
