@@ -378,8 +378,8 @@ function redraw() {
   var r = 0;
 
   svg
-  .transition()
-  .duration(500)
+  //.transition()
+  //.duration(500)
   .attr("transform", "translate(" + translate + ") scale(" + scale + ")");
 
   updateLines(scale);
