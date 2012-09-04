@@ -11,47 +11,54 @@ CONFIG = {
 
 direction = [];
 
-tx = 0;
-ty = 0;
-
-zoom = null,
-scale = 1,
-r = 0,
-t = .5,
-last = 0,
+scale        = 1,
+r            = 0,
+t            = .5,
+last         = 0,
 geoPath      = null,
-zoom         = 1,
+zoom         = null,
 currentScale = null,
 svg          = null,
 projection   = null,
 nodes        = [];
 
-starts = [],
-ends   = [];
+// Nodes
+centroids   = [],
+starts      = [],
+ends        = [];
 
+/**
+* Generates unique id
+*/
 function GUID ()
 {
-    var S4 = function ()
-    {
-        return Math.floor(
-                Math.random() * 0x10000 /* 65536 */
-            ).toString(16);
-    };
+  var S4 = function () {
+    return Math.floor(
+      Math.random() * 0x10000 /* 65536 */
+    ).toString(16);
+  };
 
-    return (
-            S4() + S4() + "-" +
-            S4() + "-" +
-            S4() + "-" +
-            S4() + "-" +
-            S4() + S4() + S4()
-        );
+  return (
+    S4() + S4() + "-" +
+      S4() + "-" +
+      S4() + "-" +
+      S4() + "-" +
+      S4() + S4() + S4()
+  );
 }
 
+
+/**
+* Returns a random coordinate
+*/
 function getRandomCenter() {
-  var i = Math.round(Math.random() * (ends.length - 1));
-  return getCoordinates(ends[i]);
+  var i = Math.round(Math.random() * (centroids.length - 1));
+  return getCoordinates(centroids[i]);
 }
 
+/**
+* Connects two points with a parabola and adds a green node
+*/
 function connectNode(origin) {
   var end = getRandomCenter();
 
@@ -59,7 +66,9 @@ function connectNode(origin) {
   addNode(end);
 }
 
-// Draw some random parabolas
+/**
+* Draws n random parabolas
+*/
 function drawParabolas(n) {
 
   var j = 0;
@@ -67,26 +76,25 @@ function drawParabolas(n) {
   _.each(starts.slice(0, n), function(c) {
     j++;
 
-    var origin        = getCoordinates(c);
-    var end           = getRandomCenter();
-    var anotherPoint  = getRandomCenter();
-    var anotherPoint2 = getRandomCenter();
+    var
+    origin = getCoordinates(c),
+    end    = getRandomCenter();
 
     drawParabola(origin, end, "parabola_light");
-    drawParabola(end, anotherPoint, "parabola_light");
-    drawParabola(end, anotherPoint2, "parabola_light");
+
+    for (i = 0; i <= Math.round(Math.random()*5); i++) {
+      var randomPoint = getRandomCenter();
+      drawParabola(end, randomPoint, "parabola_light");
+      end = randomPoint;
+    }
 
   });
 
 }
 
-
 /**
- *
- * Shows the position of the user
- *
- */
-
+* Shows the position of the user
+*/
 function addUser(center) {
 
   var
@@ -202,8 +210,6 @@ function zoomIn() {
   var
   x = -250 * (zoom.scale() - 1),
   y = -250 * (zoom.scale() - 1);
-
-  console.log(x, tx);
 
   zoom.translate([x, y]);
 
@@ -369,9 +375,6 @@ function redraw() {
   translate = d3.event.translate;
   var t     = zoom.translate();
 
-  tx = t[0];
-  ty = t[1];
-
   var r = 0;
 
   svg
@@ -529,6 +532,8 @@ function start() {
 
         var p = Math.round(Math.random()*10);
         var coordinates = projection([d.LONG, d.LAT]);
+
+        centroids.push(coordinates);
 
         if (p == 1) {
           starts.push(coordinates);
