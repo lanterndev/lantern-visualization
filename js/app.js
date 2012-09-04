@@ -138,11 +138,14 @@ function getCoordinates_(lat, lng) {
 
 function zoomIn() {
 
+
   var
   scale = zoom.scale(),
   t     = zoom.translate();
 
-  zoom.scale(scale + .5);
+  if (scale > 2) return;
+
+  zoom.scale(scale + 1);
 
   var
   x = -250 * (zoom.scale() - 1),
@@ -162,8 +165,28 @@ function zoomIn() {
 }
 
 function zoomOut() {
-  zoom.scale(zoom.scale() - .1);
-  svg.attr("transform", "scale(" + zoom.scale() + ")");
+  var
+  scale = zoom.scale(),
+  t     = zoom.translate();
+
+  if (scale < 1.5) return;
+
+  zoom.scale(scale - 1);
+
+  var
+  x = -250 * (zoom.scale() - 1),
+  y = -250 * (zoom.scale() - 1);
+
+  console.log(x, tx);
+
+  zoom.translate([x, y]);
+
+  svg
+  .transition()
+  .duration(500)
+  .attr("transform", "translate(" + x + "," + y + ") scale(" + zoom.scale() + ")");
+
+  updateLines(zoom.scale() + .2);
 }
 
 function translateAlong(id, path) {
@@ -294,7 +317,10 @@ function redraw() {
 
   var r = 0;
 
-  svg.attr("transform", "translate(" + translate + ") scale(" + scale + ")");
+  svg
+  .transition()
+  .duration(500)
+  .attr("transform", "translate(" + translate + ") scale(" + scale + ")");
 
   updateLines(scale);
 }
