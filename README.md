@@ -1,18 +1,16 @@
 Lantern
 =======
 
-1. Install bundler (if needed)
+[View project](http://vizzuality.github.com/lantern)
 
-    gem install bundler
+* This project uses compass to generate the CSS.
+* You can run a small server running the <code>asdf</code> gem:
 
-3. Add the gems
+        bundle install
+        asdf 
 
-    bundle install 
+* Before publishing the code, please compress the JavaScript files running: 
 
-4. Run the server
+        bin/compress-js
 
-    adsf
-
-5. Load the site
-
-    http://localhost:3000
+  then use the generated <code>all.js</code> file.
