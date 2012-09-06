@@ -1,9 +1,42 @@
+
 CONFIG = {
-  beamSpeed: 500,
   scale: 500,
   translate: [240, 300],
-  zoomContraints: [1, 3],
+  zoomContraints: [1, 3], // min & max zoom levels
+  zoomChangeSpeed: 500,
+  beamSpeed: 500,
+  radialMenuFadeInSpeed: 200,
+  radialMenuFadeOutSpeed: 200,
   layers: {},
+
+  radialMenu: {
+    delay: 100,
+    speed: 100,
+    initialDeg: 120,
+    armWidth: 54,
+    armSpeed: 250
+  },
+
+  styles: {
+
+    // opacity
+    countriesOpacity: .3,
+
+    // parabolas
+    parabolaLightStrokeWidth: 1,
+    parabolaStrokeWidth: 1,
+
+    // radius
+    userRadiusWidth: 3.7,
+    userStrokeWidth: 1.5,
+    beamRadiusWidth: 3,
+    nodeRadiusWidth: 2.7,
+    nodeGlowRadiusWidth: 9,
+    citiesRadiusWidth: .6,
+    citiesGlowRadiusWidth: 3
+
+  },
+
   sources: {
     countries: "data/countries.json",
     centroids: "data/centroids.csv"
@@ -33,6 +66,9 @@ function VIS() {
 
 }
 
+/*
+ * Starts timer
+ */
 VIS.prototype.startTimer = function() {
 
   var that = this;
@@ -40,11 +76,14 @@ VIS.prototype.startTimer = function() {
   d3.timer(function(elapsed) {
     that.t = that.t + (elapsed - that.last) / CONFIG.beamSpeed;
     that.last = elapsed;
-    that.update();
+    that.loop();
   });
 
 }
 
+/*
+ * Map projection setup
+ */
 VIS.prototype.setupProjection = function() {
 
   this.projection = d3.geo.mercator()
@@ -53,6 +92,9 @@ VIS.prototype.setupProjection = function() {
 
 };
 
+/*
+ * Zoom setup
+ */
 VIS.prototype.setupZoom = function() {
   var that = this;
 
@@ -61,16 +103,13 @@ VIS.prototype.setupZoom = function() {
   .on("zoom", function() {
     that.redraw();
   });
-
 }
 
 VIS.prototype.init = function() {
 
   this.startTimer();
 
-  $("#canvas").on("click", function() {
-    $(".radial-menu").fadeOut(200);
-  });
+  $("#canvas").on("click", this.closeMenu);
 
   this.setupProjection();
   this.setupZoom();
@@ -87,7 +126,7 @@ VIS.prototype.init = function() {
 };
 
 /**
-* Generates unique id
+* Generates unique ids
 */
 VIS.prototype.GUID = function()
 {
@@ -106,6 +145,9 @@ VIS.prototype.GUID = function()
   );
 }
 
+/*
+ * Returns a hash with the coordinates of a point
+ */
 VIS.prototype.getCoordinates = function(coordinates) {
   return { x: coordinates[0], y: coordinates[1] };
 }
@@ -118,7 +160,7 @@ VIS.prototype.getRandomCenter = function() {
   return this.getCoordinates(this.centroids[i]);
 }
 
-/**
+/*
 * Connects two points with a parabola and adds a green node
 */
 VIS.prototype.connectNode = function(origin) {
@@ -128,7 +170,7 @@ VIS.prototype.connectNode = function(origin) {
   this.addNode(end);
 }
 
-/**
+/*
 * Draws n random parabolas
 */
 VIS.prototype.drawParabolas = function(n) {
@@ -155,7 +197,7 @@ VIS.prototype.drawParabolas = function(n) {
   });
 }
 
-/**
+/*
 * Shows the position of the user
 */
 VIS.prototype.addUser = function(center) {
@@ -168,32 +210,35 @@ VIS.prototype.addUser = function(center) {
   layer
   .append("circle")
   .attr("class", "hollow")
-  .attr("r", 3.7)
+  .attr("r", CONFIG.styles.userRadiusWidth)
   .attr('cx', cx)
   .attr('cy', cy)
 }
 
+/*
+ * Creates a node in the point define by *coordinates*
+ */
 VIS.prototype.addNode = function(coordinates) {
 
   var
   layer = CONFIG.layers.nodes,
   that  = this;
 
-  var // coordinates
+  var
   cx = coordinates.x,
   cy = coordinates.y;
 
   // Green glow
   layer.append("circle")
   .attr("class", "green_glow")
-  .attr("r", 9)
+  .attr("r", CONFIG.styles.nodeGlowRadiusWidth)
   .attr('cx', cx)
   .attr('cy', cy)
   .attr("filter", "url(#blur.green)")
 
   // Green dot
   layer.append("circle")
-  .attr("r", 2.7)
+  .attr("r", CONFIG.styles.nodeRadiusWidth)
   .attr("class", "dot_green")
   .attr('cx', cx)
   .attr('cy', cy)
@@ -208,23 +253,34 @@ VIS.prototype.addNode = function(coordinates) {
     x = (that.zoom.scale() * cx) + t[0],
     y = (that.zoom.scale() * cy) + t[1];
 
-    that.openCircle(x, y);
+    that.openMenu(x, y);
 
   });
 }
 
-VIS.prototype.openCircle = function(cx, cy) {
+/*
+ * Closes radial menu
+ */
+VIS.prototype.closeMenu = function() {
+  $(".radial-menu").fadeOut(CONFIG.radialMenuFadeOutSpeed, "easeOutQuad");
+}
+
+/*
+ * Opens radial menu
+ */
+VIS.prototype.openMenu = function(cx, cy) {
 
   var that = this;
 
   var $circle = $(".radial-menu");
 
-  $circle.fadeOut(200, function() {
+  $circle.fadeOut(CONFIG.radialMenuFadeOutSpeed, function() {
 
     $(this).removeClass("zoom");
 
     $(this).find(".arm").remove();
 
+    // Generates several random thumbnails
     var thumbCount = 3 + Math.round(Math.random() * 7);
 
     for (var i = 0; i <= thumbCount; i++) {
@@ -236,7 +292,7 @@ VIS.prototype.openCircle = function(cx, cy) {
     $(this).find("i").css("opacity", 0);
     $(this).css({ top: cy + 20, left: cx - 40 });
 
-    $(this).fadeIn(200, "easeInQuad", function() {
+    $(this).fadeIn(CONFIG.radialMenuFadeInSpeed, "easeInQuad", function() {
       $(this).addClass("zoom");
       that.showThumbs();
     });
@@ -244,13 +300,16 @@ VIS.prototype.openCircle = function(cx, cy) {
   });
 }
 
+/*
+ * Shows the radial menu thumbs
+ */
 VIS.prototype.showThumbs = function() {
   var
   $circle    = $(".radial-menu"),
   i          = 0,
-  delay      = 100,
-  speed      = 100,
-  initialDeg = 120,
+  delay      = CONFIG.radialMenu.delay,
+  speed      = CONFIG.radialMenu.speed,
+  initialDeg = CONFIG.radialMenu.initialDeg,
   n = $circle.find(".arm").length;
 
   $circle.find(".arm").each(function(i, c) {
@@ -260,7 +319,7 @@ VIS.prototype.showThumbs = function() {
 
     $(c).css("-webkit-transform", "rotate(" + deg + "deg)");
     $(c).find("i").css("-webkit-transform", "rotate(" + -1 * deg + "deg)");
-    $(c).delay(i * delay).animate({ width: 54 }, { duration: 250, easing: "easeOutQuad" });
+    $(c).delay(i * delay).animate({ width: CONFIG.radialMenu.armWidth }, { duration: CONFIG.radialMenu.armSpeed, easing: "easeOutQuad" });
 
     $(c).find("i").delay(i * delay).animate({
       opacity: 1
@@ -270,45 +329,43 @@ VIS.prototype.showThumbs = function() {
   });
 }
 
+/*
+ * Keeps the aspect of the lines & points consisten in every zoom level
+ */
 VIS.prototype.updateLines = function(scale) {
-
-  //svg.select("#nodes")
-  //.selectAll(".red_glow")
-  //.attr("r", 5/scale)
 
   svg.select("#nodes")
   .selectAll(".hollow")
-  .attr("r", 3.7/scale)
-  .style("stroke-width", 1.5/scale)
+  .attr("r", CONFIG.styles.userRadiusWidth/scale)
+  .style("stroke-width", CONFIG.styles.userStrokeWidth/scale)
 
   svg.select("#beams")
   .selectAll("circle")
-  .attr("r", 3/scale)
+  .attr("r", CONFIG.styles.beamRadiusWidth/scale)
 
-  svg.select("#my_points2")
+  svg.select("#cities")
   .selectAll(".dot")
-  .attr("r", .6/scale)
+  .attr("r", CONFIG.styles.citiesRadiusWidth/scale)
 
-  svg.select("#my_points")
+  svg.select("#cities_glow")
   .selectAll(".glow")
-  .attr("r", 3/scale)
+  .attr("r", CONFIG.styles.citiesGlowRadiusWidth/scale)
 
   svg.select("#nodes")
   .selectAll(".green_glow")
-  .attr("r", 9/scale)
+  .attr("r", CONFIG.styles.nodeGlowRadiusWidth/scale)
 
   svg.select("#nodes")
   .selectAll(".dot_green")
-  .attr("r", 2.7/scale)
+  .attr("r", CONFIG.styles.nodeRadiusWidth/scale)
 
   svg.select("#lines")
   .selectAll(".parabola_light")
-  .attr("stroke-width", 1 / scale)
+  .attr("stroke-width", CONFIG.styles.parabolaLightStrokeWidth  / scale)
 
   svg.select("#lines")
   .selectAll(".parabola")
-  .attr("stroke-width", 1 / scale)
-
+  .attr("stroke-width", CONFIG.styles.parabolaStrokeWidth / scale)
 }
 
 VIS.prototype.zoomIn = function(that) {
@@ -329,7 +386,7 @@ VIS.prototype.zoomIn = function(that) {
 
   svg
   .transition()
-  .duration(500)
+  .duration(CONFIG.zoomChangeSpeed)
   .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
 
   that.updateLines(that.zoom.scale() + .2);
@@ -352,7 +409,7 @@ VIS.prototype.zoomOut = function(that) {
 
   svg
   .transition()
-  .duration(500)
+  .duration(CONFIG.zoomChangeSpeed)
   .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
 
   that.updateLines(that.zoom.scale() + .2);
@@ -388,12 +445,13 @@ VIS.prototype.transition = function(circle, path) {
   .duration(800)
   .style("opacity", .25)
   .transition()
-  //.duration(Math.round(Math.random(50) * 1200))
   .duration(1500)
   .delay(Math.round(Math.random(100) * 2500))
   .style("opacity", .25)
   .attrTween("transform", this.translateAlong(id, path.node()))
   .each("end", function(t) {
+
+  // Fade out the circle after it has stopped
 
     circle
     .transition()
@@ -479,16 +537,19 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
     .append("circle")
     .attr("class", "beam")
     .attr("filter", "url(#blur.beam)")
-    .attr("r", 3);
+    .attr("r", CONFIG.styles.beamRadiusWidth);
 
     that.transition(circle, path);
   }
-
 }
 
+/*
+ * This method is called every time the user
+ * zooms or pans.
+ */
 VIS.prototype.redraw = function() {
 
-  $(".radial-menu").fadeOut(200, "easeOutQuad");
+  this.closeMenu();
 
   scale     = d3.event.scale,
   translate = d3.event.translate;
@@ -496,14 +557,14 @@ VIS.prototype.redraw = function() {
   var t     = this.zoom.translate();
 
   svg
-  //.transition()
-  //.duration(500)
   .attr("transform", "translate(" + translate + ") scale(" + scale + ")");
 
   this.updateLines(scale);
 }
 
-
+/*
+ * Defines a blur effect
+ */
 VIS.prototype.addBlur = function(name, deviation) {
   svg
   .append("svg:defs")
@@ -513,6 +574,9 @@ VIS.prototype.addBlur = function(name, deviation) {
   .attr("stdDeviation", deviation);
 }
 
+/*
+ * Defines several filters
+ */
 VIS.prototype.setupFilters = function(svg) {
   this.addBlur("light",   .7);
   this.addBlur("medium",  .7);
@@ -523,9 +587,14 @@ VIS.prototype.setupFilters = function(svg) {
   this.addBlur("red",     0.5);
 }
 
-VIS.prototype.update = function() {
+/*
+ * Main loop
+ */
+VIS.prototype.loop = function() {
 
   this.r = this.r + .1;
+
+  // Beam animation
 
   var
   p       = Math.abs(Math.sin(this.t)),
@@ -540,8 +609,8 @@ VIS.prototype.update = function() {
 VIS.prototype.setupLayers = function() {
 
   CONFIG.layers.states  = svg.append("g").attr("id", "states");
-  CONFIG.layers.points  = svg.append("g").attr("id", "my_points");
-  CONFIG.layers.points2 = svg.append("g").attr("id", "my_points2");
+  CONFIG.layers.points  = svg.append("g").attr("id", "cities");
+  CONFIG.layers.points2 = svg.append("g").attr("id", "cities_glow");
   CONFIG.layers.lines   = svg.append("g").attr("id", "lines");
   CONFIG.layers.beams   = svg.append("g").attr("id", "beams");
   CONFIG.layers.nodes   = svg.append("g").attr("id", "nodes");
@@ -562,13 +631,12 @@ VIS.prototype.loadCountries = function() {
     .attr("d", that.geoPath)
     .transition()
     .duration(700)
-    .style("opacity", .3)
+    .style("opacity", CONFIG.styles.countriesOpacity)
 
     that.loadCentroids();
 
   });
 }
-
 
 VIS.prototype.loadCentroids = function() {
 
@@ -576,7 +644,7 @@ VIS.prototype.loadCentroids = function() {
 
   d3.csv(CONFIG.sources.centroids, function(collection) {
 
-    svg.select("#my_points")
+    svg.select("#cities_glow")
     .selectAll("circle")
     .data(collection)
     .enter()
@@ -585,9 +653,9 @@ VIS.prototype.loadCentroids = function() {
     .attr("class", "glow")
     .attr('cx', function(d) { return that.projection([d.LONG, d.LAT])[0]; } )
     .attr('cy', function(d) { return that.projection([d.LONG, d.LAT])[1]; } )
-    .attr("r", 3)
+    .attr("r", CONFIG.styles.citiesGlowRadiusWidth);
 
-    svg.select("#my_points2")
+    svg.select("#cities")
     .selectAll("circle")
     .data(collection)
     .enter()
@@ -610,7 +678,7 @@ VIS.prototype.loadCentroids = function() {
 
     })
     .attr('cy', function(d, i) { return that.projection([d.LONG, d.LAT])[1]; })
-    .attr("r", .6);
+    .attr("r", CONFIG.styles.citiesRadiusWidth);
 
     // Draw some random parabolas
     that.drawParabolas(3);
@@ -631,9 +699,9 @@ function start() {
 
   var vis = new VIS();
 
+  // zoom bindings
   $(".zoom_in").on("click",  function() { vis.zoomIn(vis); });
   $(".zoom_out").on("click", function() { vis.zoomOut(vis); });
 
   vis.init();
 }
-

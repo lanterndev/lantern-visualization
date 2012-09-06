@@ -12,8 +12,6 @@ i { // as in "icon"
 }
 
 // Sprites
-/*$icons-bullet-orange-spacing: 25px;*/
-
 @import "icons/*.png"; /**/
 
 .chrome { // Basic chrome
@@ -96,6 +94,7 @@ i { // as in "icon"
       }
 
       &.user   { float: left; }
+
       &.status {
         float: right;
         color: $cGray3;
@@ -238,7 +237,7 @@ circle {
   fill: $cWhite;
 }
 
-#my_points2 circle{
+#cities circle {
   fill: #fff;
   opacity:.7;
 }
