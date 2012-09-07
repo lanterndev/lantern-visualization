@@ -74,16 +74,20 @@ VIS.prototype.startTimer = function() {
   var that = this;
 
   d3.timer(function(elapsed) {
-    that.t = that.t + (elapsed - that.last) / CONFIG.beamSpeed;
-    that.last = elapsed;
-    that.loop();
-  });
+     var d = elapsed - that.last;
 
+    if (d > 48)  { // Peter Jackson
+       that.t = that.t + (elapsed - that.last) / CONFIG.beamSpeed;
+       that.last = elapsed;
+       that.loop();
+    }
+
+  });
 }
 
 /*
- * Map projection setup
- */
+* Map projection setup
+*/
 VIS.prototype.setupProjection = function() {
 
   this.projection = d3.geo.mercator()
@@ -93,8 +97,8 @@ VIS.prototype.setupProjection = function() {
 };
 
 /*
- * Zoom setup
- */
+* Zoom setup
+*/
 VIS.prototype.setupZoom = function() {
   var that = this;
 
@@ -146,8 +150,8 @@ VIS.prototype.GUID = function()
 }
 
 /*
- * Returns a hash with the coordinates of a point
- */
+* Returns a hash with the coordinates of a point
+*/
 VIS.prototype.getCoordinates = function(coordinates) {
   return { x: coordinates[0], y: coordinates[1] };
 }
@@ -216,8 +220,8 @@ VIS.prototype.addUser = function(center) {
 }
 
 /*
- * Creates a node in the point define by *coordinates*
- */
+* Creates a node in the point define by *coordinates*
+*/
 VIS.prototype.addNode = function(coordinates) {
 
   var
@@ -259,15 +263,15 @@ VIS.prototype.addNode = function(coordinates) {
 }
 
 /*
- * Closes radial menu
- */
+* Closes radial menu
+*/
 VIS.prototype.closeMenu = function() {
   $(".radial-menu").fadeOut(CONFIG.radialMenuFadeOutSpeed, "easeOutQuad");
 }
 
 /*
- * Opens radial menu
- */
+* Opens radial menu
+*/
 VIS.prototype.openMenu = function(cx, cy) {
 
   var that = this;
@@ -301,8 +305,8 @@ VIS.prototype.openMenu = function(cx, cy) {
 }
 
 /*
- * Shows the radial menu thumbs
- */
+* Shows the radial menu thumbs
+*/
 VIS.prototype.showThumbs = function() {
   var
   $circle    = $(".radial-menu"),
@@ -330,8 +334,8 @@ VIS.prototype.showThumbs = function() {
 }
 
 /*
- * Keeps the aspect of the lines & points consisten in every zoom level
- */
+* Keeps the aspect of the lines & points consisten in every zoom level
+*/
 VIS.prototype.updateLines = function(scale) {
 
   svg.select("#nodes")
@@ -416,21 +420,32 @@ VIS.prototype.zoomOut = function(that) {
 }
 
 VIS.prototype.translateAlong = function(id, path) {
-  var that = this;
+  var that = this;
 
-  var l = path.getTotalLength();
-  return function(d, i, a) {
-    return function(t) {
 
-      var p = null;
+  var l = path.getTotalLength();
+  var precalc = [];//globalPrecal[id] = globalPrecal[id] || [];
+  console.log(id);
+  if(precalc.length == 0) {
+    var N = 512;
+    for(var i = 0; i < N; ++i) {
+      var p = path.getPointAtLength((i/(N-1)) * l);
+      precalc.push("translate(" + p.x + "," + p.y + ")");
+    }
+  }
+  return function(d, i, a) {
+    return function(t) {
 
-      if (that.direction[id] == 1) p = path.getPointAtLength((1 - t) * l);
-      else p = path.getPointAtLength(t * l);
+      var p = null;
 
-      return "translate(" + p.x + "," + p.y + ")";
-    };
-  };
+      if (that.direction[id] == 1) p = precalc[N - ((t*(N-1))>>0) - 1]; //path.getPointAtLength((1 - t) * l);
+      else p = precalc[(t*(N-1))>>0];
+
+      return p;
+    };
+  };
 }
+[9/7/12 4:31:59 PM] javi.santana: eso optimiza un poquito tb
 
 VIS.prototype.transition = function(circle, path) {
 
@@ -451,7 +466,7 @@ VIS.prototype.transition = function(circle, path) {
   .attrTween("transform", this.translateAlong(id, path.node()))
   .each("end", function(t) {
 
-  // Fade out the circle after it has stopped
+    // Fade out the circle after it has stopped
 
     circle
     .transition()
@@ -544,9 +559,9 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
 }
 
 /*
- * This method is called every time the user
- * zooms or pans.
- */
+* This method is called every time the user
+* zooms or pans.
+*/
 VIS.prototype.redraw = function() {
 
   this.closeMenu();
@@ -563,8 +578,8 @@ VIS.prototype.redraw = function() {
 }
 
 /*
- * Defines a blur effect
- */
+* Defines a blur effect
+*/
 VIS.prototype.addBlur = function(name, deviation) {
   svg
   .append("svg:defs")
@@ -575,8 +590,8 @@ VIS.prototype.addBlur = function(name, deviation) {
 }
 
 /*
- * Defines several filters
- */
+* Defines several filters
+*/
 VIS.prototype.setupFilters = function(svg) {
   this.addBlur("light",   .7);
   this.addBlur("medium",  .7);
@@ -588,8 +603,8 @@ VIS.prototype.setupFilters = function(svg) {
 }
 
 /*
- * Main loop
- */
+* Main loop
+*/
 VIS.prototype.loop = function() {
 
   this.r = this.r + .1;
