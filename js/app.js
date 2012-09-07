@@ -1,3 +1,7 @@
+// slow down animations
+d3.timer.frame_function(function(callback) {
+    setTimeout(callback, 48); // FPS à la Peter Jackson
+});
 
 CONFIG = {
   scale: 500,
@@ -76,11 +80,9 @@ VIS.prototype.startTimer = function() {
   d3.timer(function(elapsed) {
      var d = elapsed - that.last;
 
-    if (d > 48)  { // Peter Jackson
-       that.t = that.t + (elapsed - that.last) / CONFIG.beamSpeed;
-       that.last = elapsed;
-       that.loop();
-    }
+     that.t = that.t + (elapsed - that.last) / CONFIG.beamSpeed;
+     that.last = elapsed;
+     that.loop();
 
   });
 }
@@ -422,17 +424,19 @@ VIS.prototype.zoomOut = function(that) {
 VIS.prototype.translateAlong = function(id, path) {
   var that = this;
 
-
   var l = path.getTotalLength();
-  var precalc = [];//globalPrecal[id] = globalPrecal[id] || [];
-  console.log(id);
-  if(precalc.length == 0) {
+  var precalc = [];
+
+  if (precalc.length == 0) {
+
     var N = 512;
+
     for(var i = 0; i < N; ++i) {
       var p = path.getPointAtLength((i/(N-1)) * l);
       precalc.push("translate(" + p.x + "," + p.y + ")");
     }
   }
+
   return function(d, i, a) {
     return function(t) {
 
@@ -445,7 +449,6 @@ VIS.prototype.translateAlong = function(id, path) {
     };
   };
 }
-[9/7/12 4:31:59 PM] javi.santana: eso optimiza un poquito tb
 
 VIS.prototype.transition = function(circle, path) {
 
