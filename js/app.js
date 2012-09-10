@@ -1,4 +1,6 @@
-// slow down animations
+var vis = {};
+
+// Slow down animations
 d3.timer.frame_function(function(callback) {
     setTimeout(callback, 48); // FPS à la Peter Jackson
 });
@@ -13,6 +15,8 @@ CONFIG = {
   radialMenuFadeOutSpeed: 200,
   layers: {},
 
+  censoredCountries: [ "China", "Cuba", "Iran", "Myanmar", "Syria", "Turkmenistan", "Uzbekistan", "Vietnam", "Burma", "Bahrain", "Belarus", "Saudi Arabia", "N. Korea" ],
+
   radialMenu: {
     delay: 100,
     speed: 100,
@@ -25,6 +29,7 @@ CONFIG = {
 
     // opacity
     countriesOpacity: .3,
+    censoredCountriesOpacity: .45,
 
     // parabolas
     parabolaLightStrokeWidth: 1,
@@ -35,9 +40,9 @@ CONFIG = {
     userStrokeWidth: 1.5,
     beamRadiusWidth: 3,
     nodeRadiusWidth: 2.7,
-    nodeGlowRadiusWidth: 9,
+    nodeGlowRadiusWidth: 8,
     citiesRadiusWidth: .6,
-    citiesGlowRadiusWidth: 3
+    citiesGlowRadiusWidth: 2.5
 
   },
 
@@ -58,6 +63,8 @@ function VIS() {
   this.starts       = [];
   this.ends         = [];
 
+  this.parabolas    = [];
+
   this.r            = 0;
   this.t            = .5;
   this.last         = 0;
@@ -69,6 +76,59 @@ function VIS() {
   this.svg          = null;
 
 }
+
+
+VIS.prototype.getLevels = function(parabola, d, t_) {
+  if (arguments.length < 2) t_ = t;
+  var x = [parabola.points.slice(0, d)];
+  for (var i = 1; i < d; i++) {
+    x.push(this.interpolate(x[x.length - 1], t_));
+  }
+  return x;
+}
+
+VIS.prototype.getCurve2 = function getCurve(parabola, d) {
+
+  var curve = parabola.bezier[d];
+
+  if (!curve) {
+    curve = parabola.bezier[d] = [];
+    for (var t_ = 0; t_ <= 1; t_ += parabola.delta) {
+      var x = this.getLevels(parabola, d, t_);
+      curve.push(x[x.length - 1][0]);
+    }
+  }
+
+  return [curve.slice(0, parabola.t / parabola.delta + 1)];
+}
+
+VIS.prototype.getCurve = function(parabola, d) {
+  curve = [];
+
+  for (var t_ = 0; t_ <= 1; t_ += parabola.delta) {
+    var x = this.getLevels(parabola, d, t_);
+    curve.push(x[x.length - 1][0]);
+  }
+
+  return [curve];
+}
+
+VIS.prototype.interpolate = function(d, p) {
+  if (arguments.length < 2) p = t;
+  var r = [];
+
+  for (var i = 1; i < d.length; i++) {
+    var d0 = d[i - 1],
+
+    d1 = d[i];
+    r.push({
+      x: d0.x + (d1.x - d0.x) * p,
+      y: d0.y + (d1.y - d0.y) * p
+    });
+  }
+  return r;
+}
+
 
 /*
  * Starts timer
@@ -422,18 +482,21 @@ VIS.prototype.zoomOut = function(that) {
 }
 
 VIS.prototype.translateAlong = function(id, path) {
-  var that = this;
 
-  var l = path.getTotalLength();
-  var precalc = [];
+  var
+  that    = this,
+  l       = path.getTotalLength(),
+  precalc = [];
 
-  if (precalc.length == 0) {
+   if (precalc.length == 0) {
 
     var N = 512;
 
     for(var i = 0; i < N; ++i) {
+
       var p = path.getPointAtLength((i/(N-1)) * l);
       precalc.push("translate(" + p.x + "," + p.y + ")");
+
     }
   }
 
@@ -487,67 +550,46 @@ VIS.prototype.transition = function(circle, path) {
 
 VIS.prototype.drawParabola = function(p1, p2, c, animated) {
 
+  var parabola = {};
+
   var // middle point coordinates
   x = Math.abs(p1.x + p2.x) / 2;
   y = Math.min(p2.y, p1.y) - Math.abs(p2.x - p1.x) * .3;
 
-  var
-  that   = this,
-  delta  = .03,
-  points = [ { x: p1.x, y: p1.y}, { x: x, y: y }, { x: p2.x, y: p2.y} ],
-  line = d3.svg.line()
-  .x(function(d) { return d.x; } )
-  .y(function(d) { return d.y; } ),
+  var that   = this;
 
-  orders  = d3.range(3, 4);
+  parabola.animated = animated;
+  parabola.t        = .03;
+  parabola.delta    = .03;
+  parabola.points   = [ { x: p1.x, y: p1.y}, { x: x, y: y }, { x: p2.x, y: p2.y} ];
+  parabola.line     = d3.svg.line().x(function(d) { return d.x; } ).y(function(d) { return d.y; } );
+  parabola.orders   = d3.range(3, 4);
+  parabola.id       = this.GUID();
+  parabola.bezier   = [];
+  parabola.c        = c;
 
-  var path = svg
+  parabola.path = svg
   .select("#lines")
-  .data(orders)
+  .data(parabola.orders)
   .selectAll("path.curve")
-  .data(getCurve)
+  .data(function(d) {
+
+    if (animated) {
+      return that.getCurve2(parabola, d);
+    } else {
+      return that.getCurve(parabola, d);
+    }
+
+  })
   .enter()
   .append("path")
-  .attr("class", c)
-  .attr("id", this.GUID())
-  .attr("d", line)
+  .attr("class", parabola.c)
+  .attr("id", parabola.id)
+  .attr("d", parabola.line)
   .attr("stroke-width", 1)
 
-  function interpolate(d, p) {
-    if (arguments.length < 2) p = t;
-    var r = [];
-
-    for (var i = 1; i < d.length; i++) {
-      var d0 = d[i - 1],
-
-      d1 = d[i];
-      r.push({
-        x: d0.x + (d1.x - d0.x) * p,
-        y: d0.y + (d1.y - d0.y) * p
-      });
-    }
-    return r;
-  }
-
-  function getLevels(d, t_) {
-    if (arguments.length < 2) t_ = t;
-    var x = [points.slice(0, d)];
-    for (var i = 1; i < d; i++) {
-      x.push(interpolate(x[x.length - 1], t_));
-    }
-    return x;
-  }
-
-  function getCurve(d) {
-    curve = [];
-
-    for (var t_ = 0; t_ <= 1; t_ += delta) {
-      var x = getLevels(d, t_);
-      curve.push(x[x.length - 1][0]);
-    }
-
-    return [curve];
-  }
+  // Store the parabola
+  this.parabolas.push(parabola);
 
   if (animated) {
     var circle = svg
@@ -557,7 +599,7 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
     .attr("filter", "url(#blur.beam)")
     .attr("r", CONFIG.styles.beamRadiusWidth);
 
-    that.transition(circle, path);
+    that.transition(circle, parabola.path);
   }
 }
 
@@ -596,7 +638,7 @@ VIS.prototype.addBlur = function(name, deviation) {
 * Defines several filters
 */
 VIS.prototype.setupFilters = function(svg) {
-  this.addBlur("light",   .7);
+  //this.addBlur("light",   .7);
   this.addBlur("medium",  .7);
   this.addBlur("strong", 2.5);
   this.addBlur("beam",    .9);
@@ -609,6 +651,7 @@ VIS.prototype.setupFilters = function(svg) {
 * Main loop
 */
 VIS.prototype.loop = function() {
+  var that = this;
 
   this.r = this.r + .1;
 
@@ -618,6 +661,25 @@ VIS.prototype.loop = function() {
   p       = Math.abs(Math.sin(this.t)),
   radius  = 6 + p*4/this.scale;
 
+  _.each(this.parabolas, function(parabola) {
+
+    if (parabola.animated && parabola.t < 1) {
+
+      parabola.t += .03;
+
+      var curve = parabola.path
+      .data(function(d) {
+        return that.getCurve2(parabola, d);
+      })
+
+      curve.enter()
+      .append("path")
+      .attr("class", "curve");
+      curve.attr("d", parabola.line);
+    }
+
+  });
+
   svg.select("#nodes")
   .selectAll(".green_glow")
   .attr("r", radius)
@@ -626,12 +688,12 @@ VIS.prototype.loop = function() {
 
 VIS.prototype.setupLayers = function() {
 
-  CONFIG.layers.states  = svg.append("g").attr("id", "states");
-  CONFIG.layers.points  = svg.append("g").attr("id", "cities");
-  CONFIG.layers.points2 = svg.append("g").attr("id", "cities_glow");
-  CONFIG.layers.lines   = svg.append("g").attr("id", "lines");
-  CONFIG.layers.beams   = svg.append("g").attr("id", "beams");
-  CONFIG.layers.nodes   = svg.append("g").attr("id", "nodes");
+  CONFIG.layers.states     = svg.append("g").attr("id", "states");
+  CONFIG.layers.cities     = svg.append("g").attr("id", "cities");
+  CONFIG.layers.citiesGlow = svg.append("g").attr("id", "cities_glow");
+  CONFIG.layers.lines      = svg.append("g").attr("id", "lines");
+  CONFIG.layers.beams      = svg.append("g").attr("id", "beams");
+  CONFIG.layers.nodes      = svg.append("g").attr("id", "nodes");
 
 }
 
@@ -649,7 +711,17 @@ VIS.prototype.loadCountries = function() {
     .attr("d", that.geoPath)
     .transition()
     .duration(700)
-    .style("opacity", CONFIG.styles.countriesOpacity)
+    .style("opacity", function(d) {
+
+      if (_.include(CONFIG.censoredCountries, d.properties.name)) return CONFIG.styles.censoredCountriesOpacity;
+      else return CONFIG.styles.countriesOpacity;
+
+    })
+    .style("fill", function(d) {
+
+      if (d.properties.name == 'China') return 'black';
+
+    })
 
     that.loadCentroids();
 
@@ -667,7 +739,7 @@ VIS.prototype.loadCentroids = function() {
     .data(collection)
     .enter()
     .append("circle")
-    .attr("filter", "url(#blur.light)")
+    //.attr("filter", "url(#blur.light)")
     .attr("class", "glow")
     .attr('cx', function(d) { return that.projection([d.LONG, d.LAT])[0]; } )
     .attr('cy', function(d) { return that.projection([d.LONG, d.LAT])[1]; } )
@@ -715,7 +787,7 @@ VIS.prototype.loadCentroids = function() {
 
 function start() {
 
-  var vis = new VIS();
+  vis = new VIS();
 
   // zoom bindings
   $(".zoom_in").on("click",  function() { vis.zoomIn(vis); });
