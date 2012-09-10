@@ -17,6 +17,8 @@ CONFIG = {
 
   censoredCountries: [ "China", "Cuba", "Iran", "Myanmar", "Syria", "Turkmenistan", "Uzbekistan", "Vietnam", "Burma", "Bahrain", "Belarus", "Saudi Arabia", "N. Korea" ],
 
+  parabolaDrawingStep: .03,
+
   radialMenu: {
     delay: 100,
     speed: 100,
@@ -30,6 +32,7 @@ CONFIG = {
     // opacity
     countriesOpacity: .3,
     censoredCountriesOpacity: .45,
+    censoredCountriesStrokeOpacity: .45,
 
     // parabolas
     parabolaLightStrokeWidth: 1,
@@ -203,7 +206,7 @@ VIS.prototype.GUID = function()
   };
 
   return (
-    S4() + S4() + "-" +
+    "d" + S4() + S4() + "-" +
       S4() + "-" +
       S4() + "-" +
       S4() + "-" +
@@ -232,8 +235,8 @@ VIS.prototype.getRandomCenter = function() {
 VIS.prototype.connectUser = function() {
   var end = this.getRandomCenter();
 
-  this.drawParabola(this.userCoordinates, end, "parabola", true);
-  this.addNode(end);
+  var parabolaID = this.drawParabola(this.userCoordinates, end, "parabola", true);
+  this.addNode(end, parabolaID);
 }
 
 /*
@@ -242,8 +245,8 @@ VIS.prototype.connectUser = function() {
 VIS.prototype.connectNode = function(origin) {
   var end = this.getRandomCenter();
 
-  this.drawParabola(origin, end, "parabola", true);
-  this.addNode(end);
+  var parabolaID = this.drawParabola(origin, end, "parabola", true);
+  this.addNode(end, parabolaID);
 }
 
 /*
@@ -294,7 +297,7 @@ VIS.prototype.addUser = function(center) {
 /*
 * Creates a node in the point define by *coordinates*
 */
-VIS.prototype.addNode = function(coordinates) {
+VIS.prototype.addNode = function(coordinates, id) {
 
   var
   layer = CONFIG.layers.nodes,
@@ -303,6 +306,16 @@ VIS.prototype.addNode = function(coordinates) {
   var
   cx = coordinates.x,
   cy = coordinates.y;
+
+  // Green glow
+  layer.append("circle")
+  .attr("class", "green_glow_2")
+  .attr("r", CONFIG.styles.nodeGlowRadiusWidth)
+  .attr('cx', cx)
+  .attr('cy', cy)
+  .attr("id", id + "_node")
+  .attr("filter", "url(#blur.green)")
+  .style("opacity", 0);
 
   // Green glow
   layer.append("circle")
@@ -319,12 +332,14 @@ VIS.prototype.addNode = function(coordinates) {
   .style("opacity", 0)
   .attr('cx', cx)
   .attr('cy', cy)
+  //.attr("id", id + "_node")
   .attr("filter", "url(#blur.node)")
   .on("click", function() {
     d3.event.stopPropagation();
 
     // Coordinates of the click adjusted to the zoom
     // level & translation vector
+
     var
     t = that.zoom.translate(),
     x = (that.zoom.scale() * cx) + t[0],
@@ -527,13 +542,12 @@ VIS.prototype.translateAlong = function(id, path) {
   };
 }
 
-VIS.prototype.transition = function(circle, path) {
+VIS.prototype.transition = function(circle, parabola) {
 
   var that = this;
 
-  var id = path.attr("id");
 
-  if (!this.direction[id]) this.direction[id] = 1;
+  if (!this.direction[parabola.id]) this.direction[parabola.id] = 1;
 
   circle
   .transition()
@@ -543,7 +557,7 @@ VIS.prototype.transition = function(circle, path) {
   .duration(1500)
   .delay(Math.round(Math.random(100) * 2500))
   .style("opacity", .25)
-  .attrTween("transform", this.translateAlong(id, path.node()))
+  .attrTween("transform", this.translateAlong(parabola.id, parabola.path.node()))
   .each("end", function(t) {
 
     // Fade out the circle after it has stopped
@@ -554,8 +568,29 @@ VIS.prototype.transition = function(circle, path) {
     .style("opacity", 0)
     .each("end", function() {
 
-      that.direction[id] = -1*that.direction[id]; // changes the direction
-      that.transition(circle, path);
+      that.direction[parabola.id] = -1*that.direction[parabola.id]; // changes the direction
+
+      if (that.direction[parabola.id] == 1) {
+        svg.select("#" + parabola.id + "_node")
+        .transition()
+        .duration(500)
+        .style("opacity", .5)
+        .each("end", function(t) {
+
+          d3.select(this).transition()
+          .duration(500)
+          .style("opacity", 0);
+
+        });
+      }
+
+
+
+      that.transition(circle, parabola);
+
+
+
+
 
     });
 
@@ -613,8 +648,10 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
     .attr("filter", "url(#blur.beam)")
     .attr("r", CONFIG.styles.beamRadiusWidth);
 
-    that.transition(circle, parabola.path);
+    that.transition(circle, parabola);
   }
+
+  return parabola.id
 }
 
 /*
@@ -679,7 +716,7 @@ VIS.prototype.loop = function() {
 
     if (parabola.animated && parabola.t < 1) {
 
-      parabola.t += .03;
+      parabola.t += CONFIG.parabolaDrawingStep;
 
       var curve = parabola.path
       .data(function(d) {
@@ -725,6 +762,18 @@ VIS.prototype.loadCountries = function() {
     .attr("d", that.geoPath)
     .transition()
     .duration(700)
+    .style("stroke", function(d) {
+
+      if (_.include(CONFIG.censoredCountries, d.properties.name)) return "#fff";
+      else return "none";
+
+    })
+    .style("stroke-opacity", function(d) {
+
+      if (_.include(CONFIG.censoredCountries, d.properties.name)) return CONFIG.styles.censoredCountriesStrokeOpacity;
+      else return 0;
+
+    })
     .style("opacity", function(d) {
 
       if (_.include(CONFIG.censoredCountries, d.properties.name)) return CONFIG.styles.censoredCountriesOpacity;
