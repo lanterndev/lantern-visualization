@@ -77,6 +77,44 @@ function VIS() {
 
 }
 
+
+VIS.prototype.getLevels = function(parabola, d, t_) {
+  if (arguments.length < 2) t_ = t;
+  var x = [parabola.points.slice(0, d)];
+  for (var i = 1; i < d; i++) {
+    x.push(this.interpolate(x[x.length - 1], t_));
+  }
+  return x;
+}
+
+VIS.prototype.getCurve = function(parabola, d) {
+  curve = [];
+
+  for (var t_ = 0; t_ <= 1; t_ += parabola.delta) {
+    var x = this.getLevels(parabola, d, t_);
+    curve.push(x[x.length - 1][0]);
+  }
+
+  return [curve];
+}
+
+VIS.prototype.interpolate = function(d, p) {
+  if (arguments.length < 2) p = t;
+  var r = [];
+
+  for (var i = 1; i < d.length; i++) {
+    var d0 = d[i - 1],
+
+    d1 = d[i];
+    r.push({
+      x: d0.x + (d1.x - d0.x) * p,
+      y: d0.y + (d1.y - d0.y) * p
+    });
+  }
+  return r;
+}
+
+
 /*
  * Starts timer
  */
@@ -515,7 +553,7 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
   .select("#lines")
   .data(parabola.orders)
   .selectAll("path.curve")
-  .data(getCurve)
+  .data(function(d) { return that.getCurve(parabola, d); })
   .enter()
   .append("path")
   .attr("class", c)
@@ -525,42 +563,6 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
 
   // Store the parabola
   this.parabolas.push(parabola);
-
-  function interpolate(d, p) {
-    if (arguments.length < 2) p = t;
-    var r = [];
-
-    for (var i = 1; i < d.length; i++) {
-      var d0 = d[i - 1],
-
-      d1 = d[i];
-      r.push({
-        x: d0.x + (d1.x - d0.x) * p,
-        y: d0.y + (d1.y - d0.y) * p
-      });
-    }
-    return r;
-  }
-
-  function getLevels(d, t_) {
-    if (arguments.length < 2) t_ = t;
-    var x = [parabola.points.slice(0, d)];
-    for (var i = 1; i < d; i++) {
-      x.push(interpolate(x[x.length - 1], t_));
-    }
-    return x;
-  }
-
-  function getCurve(d) {
-    curve = [];
-
-    for (var t_ = 0; t_ <= 1; t_ += parabola.delta) {
-      var x = getLevels(d, t_);
-      curve.push(x[x.length - 1][0]);
-    }
-
-    return [curve];
-  }
 
   if (animated) {
     var circle = svg
