@@ -87,6 +87,21 @@ VIS.prototype.getLevels = function(parabola, d, t_) {
   return x;
 }
 
+VIS.prototype.getCurve2 = function getCurve(parabola, d) {
+
+  var curve = parabola.bezier[d];
+
+  if (!curve) {
+    curve = parabola.bezier[d] = [];
+    for (var t_ = 0; t_ <= 1; t_ += parabola.delta) {
+      var x = this.getLevels(parabola, d, t_);
+      curve.push(x[x.length - 1][0]);
+    }
+  }
+
+  return [curve.slice(0, parabola.t / parabola.delta + 1)];
+}
+
 VIS.prototype.getCurve = function(parabola, d) {
   curve = [];
 
@@ -543,20 +558,32 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
 
   var that   = this;
 
-  parabola.delta   = .03;
-  parabola.points  = [ { x: p1.x, y: p1.y}, { x: x, y: y }, { x: p2.x, y: p2.y} ];
-  parabola.line    = d3.svg.line().x(function(d) { return d.x; } ).y(function(d) { return d.y; } );
-  parabola.orders  = d3.range(3, 4);
-  parabola.id      = this.GUID();
+  parabola.animated = animated;
+  parabola.t        = .03;
+  parabola.delta    = .03;
+  parabola.points   = [ { x: p1.x, y: p1.y}, { x: x, y: y }, { x: p2.x, y: p2.y} ];
+  parabola.line     = d3.svg.line().x(function(d) { return d.x; } ).y(function(d) { return d.y; } );
+  parabola.orders   = d3.range(3, 4);
+  parabola.id       = this.GUID();
+  parabola.bezier   = [];
+  parabola.class    = c;
 
   parabola.path = svg
   .select("#lines")
   .data(parabola.orders)
   .selectAll("path.curve")
-  .data(function(d) { return that.getCurve(parabola, d); })
+  .data(function(d) {
+
+    if (animated) {
+      return that.getCurve2(parabola, d);
+    } else {
+      return that.getCurve(parabola, d);
+    }
+
+  })
   .enter()
   .append("path")
-  .attr("class", c)
+  .attr("class", parabola.class)
   .attr("id", parabola.id)
   .attr("d", parabola.line)
   .attr("stroke-width", 1)
@@ -624,6 +651,7 @@ VIS.prototype.setupFilters = function(svg) {
 * Main loop
 */
 VIS.prototype.loop = function() {
+  var that = this;
 
   this.r = this.r + .1;
 
@@ -632,6 +660,25 @@ VIS.prototype.loop = function() {
   var
   p       = Math.abs(Math.sin(this.t)),
   radius  = 6 + p*4/this.scale;
+
+  _.each(this.parabolas, function(parabola) {
+
+    if (parabola.animated && parabola.t < 1) {
+
+      parabola.t += .03;
+
+      var curve = parabola.path
+      .data(function(d) {
+        return that.getCurve2(parabola, d);
+      })
+
+      curve.enter()
+      .append("path")
+      .attr("class", "curve");
+      curve.attr("d", parabola.line);
+    }
+
+  });
 
   svg.select("#nodes")
   .selectAll(".green_glow")
