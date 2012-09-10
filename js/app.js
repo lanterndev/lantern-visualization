@@ -1,6 +1,6 @@
 // Slow down animations
 d3.timer.frame_function(function(callback) {
-    setTimeout(callback, 58); // FPS à la Peter Jackson
+    setTimeout(callback, 48); // FPS à la Peter Jackson
 });
 
 CONFIG = {
@@ -632,12 +632,12 @@ VIS.prototype.loop = function() {
 
 VIS.prototype.setupLayers = function() {
 
-  CONFIG.layers.states  = svg.append("g").attr("id", "states");
-  CONFIG.layers.points  = svg.append("g").attr("id", "cities");
-  CONFIG.layers.points2 = svg.append("g").attr("id", "cities_glow");
-  CONFIG.layers.lines   = svg.append("g").attr("id", "lines");
-  CONFIG.layers.beams   = svg.append("g").attr("id", "beams");
-  CONFIG.layers.nodes   = svg.append("g").attr("id", "nodes");
+  CONFIG.layers.states     = svg.append("g").attr("id", "states");
+  CONFIG.layers.cities     = svg.append("g").attr("id", "cities");
+  CONFIG.layers.citiesGlow = svg.append("g").attr("id", "cities_glow");
+  CONFIG.layers.lines      = svg.append("g").attr("id", "lines");
+  CONFIG.layers.beams      = svg.append("g").attr("id", "beams");
+  CONFIG.layers.nodes      = svg.append("g").attr("id", "nodes");
 
 }
 
