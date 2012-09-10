@@ -1,3 +1,5 @@
+var vis = {};
+
 // Slow down animations
 d3.timer.frame_function(function(callback) {
     setTimeout(callback, 48); // FPS à la Peter Jackson
@@ -60,6 +62,8 @@ function VIS() {
   this.centroids    = [];
   this.starts       = [];
   this.ends         = [];
+
+  this.parabolas    = [];
 
   this.r            = 0;
   this.t            = .5;
@@ -493,31 +497,34 @@ VIS.prototype.transition = function(circle, path) {
 
 VIS.prototype.drawParabola = function(p1, p2, c, animated) {
 
+  var parabola = {};
+
   var // middle point coordinates
   x = Math.abs(p1.x + p2.x) / 2;
   y = Math.min(p2.y, p1.y) - Math.abs(p2.x - p1.x) * .3;
 
-  var
-  that   = this,
-  delta  = .03,
-  points = [ { x: p1.x, y: p1.y}, { x: x, y: y }, { x: p2.x, y: p2.y} ],
-  line = d3.svg.line()
-  .x(function(d) { return d.x; } )
-  .y(function(d) { return d.y; } ),
+  var that   = this;
 
-  orders  = d3.range(3, 4);
+  parabola.delta   = .03;
+  parabola.points  = [ { x: p1.x, y: p1.y}, { x: x, y: y }, { x: p2.x, y: p2.y} ];
+  parabola.line    = d3.svg.line().x(function(d) { return d.x; } ).y(function(d) { return d.y; } );
+  parabola.orders  = d3.range(3, 4);
+  parabola.id      = this.GUID();
 
-  var path = svg
+  parabola.path = svg
   .select("#lines")
-  .data(orders)
+  .data(parabola.orders)
   .selectAll("path.curve")
   .data(getCurve)
   .enter()
   .append("path")
   .attr("class", c)
-  .attr("id", this.GUID())
-  .attr("d", line)
+  .attr("id", parabola.id)
+  .attr("d", parabola.line)
   .attr("stroke-width", 1)
+
+  // Store the parabola
+  this.parabolas.push(parabola);
 
   function interpolate(d, p) {
     if (arguments.length < 2) p = t;
@@ -537,7 +544,7 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
 
   function getLevels(d, t_) {
     if (arguments.length < 2) t_ = t;
-    var x = [points.slice(0, d)];
+    var x = [parabola.points.slice(0, d)];
     for (var i = 1; i < d; i++) {
       x.push(interpolate(x[x.length - 1], t_));
     }
@@ -547,7 +554,7 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
   function getCurve(d) {
     curve = [];
 
-    for (var t_ = 0; t_ <= 1; t_ += delta) {
+    for (var t_ = 0; t_ <= 1; t_ += parabola.delta) {
       var x = getLevels(d, t_);
       curve.push(x[x.length - 1][0]);
     }
@@ -563,7 +570,7 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
     .attr("filter", "url(#blur.beam)")
     .attr("r", CONFIG.styles.beamRadiusWidth);
 
-    that.transition(circle, path);
+    that.transition(circle, parabola.path);
   }
 }
 
@@ -731,7 +738,7 @@ VIS.prototype.loadCentroids = function() {
 
 function start() {
 
-  var vis = new VIS();
+  vis = new VIS();
 
   // zoom bindings
   $(".zoom_in").on("click",  function() { vis.zoomIn(vis); });
