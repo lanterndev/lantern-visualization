@@ -22,3 +22,4 @@ Lantern
 - Adds censored country list.
 - Removes the blur effect in the city glows to reduce CPU usage.
 - Animates user lines.
+- Adds fadeIn effect for green nodes.

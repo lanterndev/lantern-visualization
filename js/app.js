@@ -226,6 +226,16 @@ VIS.prototype.getRandomCenter = function() {
   return this.getCoordinates(this.centroids[i]);
 }
 
+/**
+* Connects the user with a random point
+*/
+VIS.prototype.connectUser = function() {
+  var end = this.getRandomCenter();
+
+  this.drawParabola(this.userCoordinates, end, "parabola", true);
+  this.addNode(end);
+}
+
 /*
 * Connects two points with a parabola and adds a green node
 */
@@ -306,6 +316,7 @@ VIS.prototype.addNode = function(coordinates) {
   layer.append("circle")
   .attr("r", CONFIG.styles.nodeRadiusWidth)
   .attr("class", "dot_green")
+  .style("opacity", 0)
   .attr('cx', cx)
   .attr('cy', cy)
   .attr("filter", "url(#blur.node)")
@@ -321,7 +332,10 @@ VIS.prototype.addNode = function(coordinates) {
 
     that.openMenu(x, y);
 
-  });
+  })
+  .transition()
+  .duration(500)
+  .style("opacity", 1)
 }
 
 /*
@@ -776,10 +790,12 @@ VIS.prototype.loadCentroids = function() {
     // Draw the user's circle and connect it
     var center = that.getRandomCenter();
 
+    that.userCoordinates = center;
+
     that.addUser(center);
 
     for (var i = 0; i<= 2 + Math.round(Math.random() * 3); i++) {
-      that.connectNode(center);
+      that.connectUser();
     }
 
   });
