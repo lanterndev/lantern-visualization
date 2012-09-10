@@ -1,6 +1,6 @@
 // Slow down animations
 d3.timer.frame_function(function(callback) {
-    setTimeout(callback, 48); // FPS à la Peter Jackson
+    setTimeout(callback, 58); // FPS à la Peter Jackson
 });
 
 CONFIG = {
@@ -38,7 +38,7 @@ CONFIG = {
     userStrokeWidth: 1.5,
     beamRadiusWidth: 3,
     nodeRadiusWidth: 2.7,
-    nodeGlowRadiusWidth: 9,
+    nodeGlowRadiusWidth: 8,
     citiesRadiusWidth: .6,
     citiesGlowRadiusWidth: 2.5
 
@@ -425,18 +425,21 @@ VIS.prototype.zoomOut = function(that) {
 }
 
 VIS.prototype.translateAlong = function(id, path) {
-  var that = this;
 
-  var l = path.getTotalLength();
-  var precalc = [];
+  var
+  that    = this,
+  l       = path.getTotalLength(),
+  precalc = [];
 
-  if (precalc.length == 0) {
+   if (precalc.length == 0) {
 
     var N = 512;
 
     for(var i = 0; i < N; ++i) {
+
       var p = path.getPointAtLength((i/(N-1)) * l);
       precalc.push("translate(" + p.x + "," + p.y + ")");
+
     }
   }
 
