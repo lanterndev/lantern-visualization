@@ -91,7 +91,7 @@ VIS.prototype.getLevels = function(parabola, d, t_) {
   return x;
 }
 
-VIS.prototype.getCurve2 = function getCurve(parabola, d) {
+VIS.prototype.getSlicedCurve = function getCurve(parabola, d) {
 
   var curve = parabola.bezier[d];
 
@@ -311,7 +311,6 @@ VIS.prototype.addNode = function(coordinates, id) {
   // Green glow
   layer.append("circle")
   .attr("class", "green_glow_2")
-  .attr("r", CONFIG.styles.nodeGlowRadiusWidth)
   .attr('cx', cx)
   .attr('cy', cy)
   .attr("id", id + "_node")
@@ -352,6 +351,8 @@ VIS.prototype.addNode = function(coordinates, id) {
   .transition()
   .duration(500)
   .style("opacity", 1)
+
+  this.updateLines(that.zoom.scale() + .2);
 }
 
 /*
@@ -448,6 +449,10 @@ VIS.prototype.updateLines = function(scale) {
   .attr("r", CONFIG.styles.citiesGlowRadiusWidth/scale)
 
   svg.select("#nodes")
+  .selectAll(".green_glow_2")
+  .attr("r", CONFIG.styles.nodeGlowRadiusWidth/scale)
+
+  svg.select("#nodes")
   .selectAll(".green_glow")
   .attr("r", CONFIG.styles.nodeGlowRadiusWidth/scale)
 
@@ -461,7 +466,7 @@ VIS.prototype.updateLines = function(scale) {
 
   svg.select("#lines")
   .selectAll(".parabola")
-  .attr("stroke-width", CONFIG.styles.parabolaStrokeWidth / scale)
+  .attr("stroke-width", CONFIG.styles.parabolaStrokeWidth / scale);
 }
 
 VIS.prototype.zoomIn = function(that) {
@@ -625,7 +630,7 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
   .data(function(d) {
 
     if (animated) {
-      return that.getCurve2(parabola, d);
+      return that.getSlicedCurve(parabola, d);
     } else {
       return that.getCurve(parabola, d);
     }
@@ -652,6 +657,7 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
     that.transition(circle, parabola);
   }
 
+  this.updateLines(that.zoom.scale() + .2);
   return parabola.id
 }
 
@@ -713,6 +719,7 @@ VIS.prototype.loop = function() {
   p       = Math.abs(Math.sin(this.t)),
   radius  = 6 + p*4/this.scale;
 
+
   _.each(this.parabolas, function(parabola) {
 
     if (parabola.animated && parabola.t < 1) {
@@ -721,7 +728,7 @@ VIS.prototype.loop = function() {
 
       var curve = parabola.path
       .data(function(d) {
-        return that.getCurve2(parabola, d);
+        return that.getSlicedCurve(parabola, d);
       })
 
       curve.enter()
@@ -736,6 +743,7 @@ VIS.prototype.loop = function() {
   .selectAll(".green_glow")
   .attr("r", radius)
   .attr("opacity", p);
+
 }
 
 VIS.prototype.setupLayers = function() {
