@@ -48,10 +48,9 @@ Green nodes:
     },
     ...]
 
-Centroids:
+Countries centroids (city lights):
 
-    LAT,LONG,DMS_LAT,DMS_LONG,MGRS,JOG,DSG,AFFIL,FIPS10,SHORT_NAME,FULL_NAME,MOD_DATE,ISO3136
-    28,3,280000,30000,31REL0000097202,NH31-15,PCLI,,AG,Algeria,People's Democratic Republic of Algeria,2011-03-03,DZ
-    -14.3333333,-170,-142000,-1700000,1802701,,PCLD,US,AS,American Samoa,Territory of American Samoa,1998-10-06,AS
-    42.5,1.5,423000,13000,31TCH7675006383,NK31-04,PCLI,,AN,Andorra,Principality of Andorra,2007-02-28,AD
-    -34,-64,-340000,-640000,20HMH0765037393,SI20-06,PCLI,,AR,Argentina,Argentine Republic,2007-02-28,AR
+    LAT,LONG,FULL_NAME,ISO3136
+    42.5,1.5,Principality of Andorra,AD
+    60,-96,Canada,CA
+    15.5,47.5,Republic of Yemen,YE
