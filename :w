@@ -662,7 +662,7 @@ VIS.prototype.loadCentroids = function() {
     .data(collection)
     .enter()
     .append("circle")
-    //.attr("filter", "url(#blur.light)")
+    .attr("filter", "url(#blur.light)")
     .attr("class", "glow")
     .attr('cx', function(d) { return that.projection([d.LONG, d.LAT])[0]; } )
     .attr('cy', function(d) { return that.projection([d.LONG, d.LAT])[1]; } )
