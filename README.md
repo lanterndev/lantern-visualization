@@ -15,9 +15,9 @@ Lantern
 
   then use the generated <code>all.js</code> file.
 
-**[CHANGELOG]**
+**CHANGELOG**
 
-* 09/10/12: 
+09/10/12
 
-  - Adds censored country list.
-  - Removes the blur effect in the city glows to reduce CPU usage.
+- Adds censored country list.
+- Removes the blur effect in the city glows to reduce CPU usage.
