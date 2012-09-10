@@ -8,6 +8,8 @@ CONFIG = {
   radialMenuFadeOutSpeed: 200,
   layers: {},
 
+  censoredCountries: [ "China", "Cuba", "Iran", "Myanmar", "Syria", "Turkmenistan", "Uzbekistan", "Vietnam", "Burma", "Bahrain", "Belarus", "Saudi Arabia", "N. Korea" ],
+
   radialMenu: {
     delay: 100,
     speed: 100,
@@ -20,6 +22,7 @@ CONFIG = {
 
     // opacity
     countriesOpacity: .3,
+    censoredCountriesOpacity: .45,
 
     // parabolas
     parabolaLightStrokeWidth: 1,
@@ -32,7 +35,7 @@ CONFIG = {
     nodeRadiusWidth: 2.7,
     nodeGlowRadiusWidth: 9,
     citiesRadiusWidth: .6,
-    citiesGlowRadiusWidth: 3
+    citiesGlowRadiusWidth: 2.5
 
   },
 
@@ -424,14 +427,16 @@ VIS.prototype.translateAlong = function(id, path) {
 
   var l = path.getTotalLength();
   var precalc = [];//globalPrecal[id] = globalPrecal[id] || [];
-  console.log(id);
-  if(precalc.length == 0) {
+
+  if (precalc.length == 0) {
     var N = 512;
+
     for(var i = 0; i < N; ++i) {
       var p = path.getPointAtLength((i/(N-1)) * l);
       precalc.push("translate(" + p.x + "," + p.y + ")");
     }
   }
+
   return function(d, i, a) {
     return function(t) {
 
@@ -644,7 +649,17 @@ VIS.prototype.loadCountries = function() {
     .attr("d", that.geoPath)
     .transition()
     .duration(700)
-    .style("opacity", CONFIG.styles.countriesOpacity)
+    .style("opacity", function(d) {
+
+      if (_.include(CONFIG.censoredCountries, d.properties.name)) return CONFIG.styles.censoredCountriesOpacity;
+      else return CONFIG.styles.countriesOpacity;
+
+    })
+    .style("fill", function(d) {
+
+      if (d.properties.name == 'China') return 'black';
+
+    })
 
     that.loadCentroids();
 
