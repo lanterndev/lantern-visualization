@@ -24,3 +24,27 @@ Lantern
 - Animates user lines.
 - Adds fadeIn effect for green nodes.
 - The green nodes shine with more intensity when a white dot joins them. 
+
+**SPECS**
+
+User spec:
+
+    {
+      lat: 1234.56,
+      lng: 7890.99
+    }
+
+Green nodes:
+
+    [{
+      lat: 1234.56,
+      lng: 7890.99
+      avatar: "http://images.getlantern.org/users/avatar/fl32k32j978fsdfs.jpg"
+    },
+    {
+      lat: 2143.65,
+      lng: 8709.99
+      avatar: "http://images.getlantern.org/users/avatar/lf233kj2987fdsfs.jpg"
+    },
+    ...
+    ]
