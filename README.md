@@ -23,3 +23,4 @@ Lantern
 - Removes the blur effect in the city glows to reduce CPU usage.
 - Animates user lines.
 - Adds fadeIn effect for green nodes.
+- The green nodes shine with more intensity when a white dot joins them. 

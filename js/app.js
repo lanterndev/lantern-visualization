@@ -15,6 +15,7 @@ CONFIG = {
   radialMenuFadeOutSpeed: 200,
   layers: {},
 
+  // http://en.wikipedia.org/wiki/Censorship_by_country
   censoredCountries: [ "China", "Cuba", "Iran", "Myanmar", "Syria", "Turkmenistan", "Uzbekistan", "Vietnam", "Burma", "Bahrain", "Belarus", "Saudi Arabia", "N. Korea" ],
 
   parabolaDrawingStep: .03,
