@@ -325,3 +325,9 @@ circle {
   opacity:1;
   width: 119px; height: 119px;
 }
+
+#canvas svg {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+}
