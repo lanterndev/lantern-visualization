@@ -1,5 +1,5 @@
 var vis = {};
-
+var svg = null;
 // Slow down animations
 d3.timer.frame_function(function(callback) {
     setTimeout(callback, 48); // FPS à la Peter Jackson
@@ -180,10 +180,14 @@ VIS.prototype.init = function() {
   this.setupProjection();
   this.setupZoom();
 
-  svg = d3.select("#canvas")
-  .append("svg")
-  .call(this.zoom)
-  .append("g");
+  svg = d3.select("#canvas");
+  svg.paper = svg.raphael(200,200);
+  svg.sets = {},
+  svg.sets['root'] = svg.paper.append('set');
+
+  // .append("svg")
+  // .call(this.zoom)
+  // .append("g");
 
   this.setupFilters(svg);
   this.setupLayers();
@@ -293,7 +297,7 @@ VIS.prototype.addNode = function(coordinates) {
   var
   cx = coordinates.x,
   cy = coordinates.y;
-
+  console.log('aaa');
   // Green glow
   layer.append("circle")
   .attr("class", "green_glow")
@@ -577,7 +581,7 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
   parabola.orders   = d3.range(3, 4);
   parabola.id       = this.GUID();
   parabola.bezier   = [];
-  parabola.class    = c;
+  parabola["class"]    = c;
 
   parabola.path = svg
   .select("#lines")
@@ -594,7 +598,7 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
   })
   .enter()
   .append("path")
-  .attr("class", parabola.class)
+  .attr("class", parabola["class"])
   .attr("id", parabola.id)
   .attr("d", parabola.line)
   .attr("stroke-width", 1)
@@ -699,12 +703,12 @@ VIS.prototype.loop = function() {
 
 VIS.prototype.setupLayers = function() {
 
-  CONFIG.layers.states     = svg.append("g").attr("id", "states");
-  CONFIG.layers.cities     = svg.append("g").attr("id", "cities");
-  CONFIG.layers.citiesGlow = svg.append("g").attr("id", "cities_glow");
-  CONFIG.layers.lines      = svg.append("g").attr("id", "lines");
-  CONFIG.layers.beams      = svg.append("g").attr("id", "beams");
-  CONFIG.layers.nodes      = svg.append("g").attr("id", "nodes");
+  CONFIG.layers.states     = svg.sets['states'] = svg.paper.append('set').attr("id", "states");
+  CONFIG.layers.cities     = svg.sets['cities'] = svg.paper.append('set').attr("id", "cities");
+  CONFIG.layers.citiesGlow = svg.sets['cities_glow'] = svg.paper.append('set').attr("id", "cities_glow");
+  CONFIG.layers.lines      = svg.sets['lines'] = svg.paper.append('set').attr("id", "lines");
+  CONFIG.layers.beams      = svg.sets['beams'] = svg.paper.append('set').attr("id", "beams");
+  CONFIG.layers.nodes      = svg.sets['nodes'] = svg.paper.append('set').attr("id", "nodes");
 
 }
 
@@ -713,28 +717,30 @@ VIS.prototype.loadCountries = function() {
 
   d3.json(CONFIG.sources.countries, function(collection) {
 
+    console.log(collection);
     that.geoPath = d3.geo.path().projection(that.projection)
 
-    svg.select("#states")
-    .selectAll("path")
+    var st = svg.sets["states"].selectAll("path")
     .data(collection.features)
     .enter().append("path")
     .attr("d", that.geoPath)
     .transition()
-    .duration(700)
-    .style("opacity", function(d) {
+    .duration(700);
+    setTimeout(function() {
+      st.style("opacity", function(d) {
 
-      if (_.include(CONFIG.censoredCountries, d.properties.name)) return CONFIG.styles.censoredCountriesOpacity;
-      else return CONFIG.styles.countriesOpacity;
+        if (_.include(CONFIG.censoredCountries, d.properties.name)) return CONFIG.styles.censoredCountriesOpacity;
+        else return CONFIG.styles.countriesOpacity;
 
-    })
-    .style("fill", function(d) {
+      })
+      .style("fill", function(d) {
 
-      if (d.properties.name == 'China') return 'black';
+        if (d.properties.name == 'China') return 'black';
 
-    })
+      })
+      that.loadCentroids();
+    }, 700)
 
-    that.loadCentroids();
 
   });
 }
@@ -745,7 +751,7 @@ VIS.prototype.loadCentroids = function() {
 
   d3.csv(CONFIG.sources.centroids, function(collection) {
 
-    svg.select("#cities_glow")
+    var a = svg.sets["cities_glow"]
     .selectAll("circle")
     .data(collection)
     .enter()
@@ -756,7 +762,7 @@ VIS.prototype.loadCentroids = function() {
     .attr('cy', function(d) { return that.projection([d.LONG, d.LAT])[1]; } )
     .attr("r", CONFIG.styles.citiesGlowRadiusWidth);
 
-    svg.select("#cities")
+    svg.sets["cities"]
     .selectAll("circle")
     .data(collection)
     .enter()
@@ -790,7 +796,7 @@ VIS.prototype.loadCentroids = function() {
     that.addUser(center);
 
     for (var i = 0; i<= 2 + Math.round(Math.random() * 3); i++) {
-      that.connectNode(center);
+      // that.connectNode(center);
     }
 
   });
