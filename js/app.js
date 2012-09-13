@@ -366,6 +366,18 @@ VIS.prototype.openMenu = function(cx, cy) {
   });
 }
 
+
+$.fn.rotate = function(deg) {
+  $(this).css("transform", "rotate(" + deg + "deg)");
+  $(this).find("i").css("transform", "rotate(" + -1 * deg + "deg)");
+  $(this).css("-webkit-transform", "rotate(" + deg + "deg)");
+  $(this).find("i").css("-webkit-transform", "rotate(" + -1 * deg + "deg)");
+  $(this).css("-moz-transform", "rotate(" + deg + "deg)");
+  $(this).find("i").css("-moz-transform", "rotate(" + -1 * deg + "deg)");
+  $(this).css("-o-transform", "rotate(" + deg + "deg)");
+  $(this).find("i").css("-o-transform", "rotate(" + -1 * deg + "deg)");
+}
+
 /*
 * Shows the radial menu thumbs
 */
@@ -383,8 +395,7 @@ VIS.prototype.showThumbs = function() {
 
     var deg = (i * 360 / n) - initialDeg;
 
-    $(c).css("-webkit-transform", "rotate(" + deg + "deg)");
-    $(c).find("i").css("-webkit-transform", "rotate(" + -1 * deg + "deg)");
+    $(c).rotate(deg);
     $(c).delay(i * delay).animate({ width: CONFIG.radialMenu.armWidth }, { duration: CONFIG.radialMenu.armSpeed, easing: "easeOutQuad" });
 
     $(c).find("i").delay(i * delay).animate({

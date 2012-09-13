@@ -300,7 +300,11 @@ circle {
     @include size(0px, 26px);
     @include position(45px, false, false, 58px);
 
+    transform-origin:0 50%;
+    -ms-transform-origin:0 50%; /* IE 9 */
     -webkit-transform-origin: 0 50%;
+    -moz-transform-origin:0 50%;
+    -o-transform-origin:0% 50%;
     text-align: right
   }
 
