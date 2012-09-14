@@ -181,7 +181,7 @@ VIS.prototype.init = function() {
   this.setupZoom();
 
   svg = d3.select("#canvas");
-  svg.paper = svg.raphael(200,200);
+  svg.paper = svg.raphael(480,600);
   svg.sets = {},
   svg.sets['root'] = svg.paper.append('set');
 
@@ -248,14 +248,12 @@ VIS.prototype.drawParabolas = function(n) {
   var
   j    = 0
   that = this;
-
   _.each(that.starts.slice(0, n), function(c) {
     j++;
 
     var
     origin = that.getCoordinates(c),
     end    = that.getRandomCenter();
-
     that.drawParabola(origin, end, "parabola_light", false);
 
     for (i = 0; i <= Math.round(Math.random()*5); i++) {
@@ -283,6 +281,8 @@ VIS.prototype.addUser = function(center) {
   .attr("r", CONFIG.styles.userRadiusWidth)
   .attr('cx', cx)
   .attr('cy', cy)
+  .attr('stroke', '#FF6666')
+  .attr('stroke-width', 1.5);
 }
 
 /*
@@ -297,19 +297,23 @@ VIS.prototype.addNode = function(coordinates) {
   var
   cx = coordinates.x,
   cy = coordinates.y;
-  console.log('aaa');
   // Green glow
   layer.append("circle")
   .attr("class", "green_glow")
+  .attr("fill", "#AAD092")
+  .attr("fill-opacity", '.25')
   .attr("r", CONFIG.styles.nodeGlowRadiusWidth)
   .attr('cx', cx)
   .attr('cy', cy)
   .attr("filter", "url(#blur.green)")
+  console.log(cx);
+  console.log(cy);
 
   // Green dot
   layer.append("circle")
   .attr("r", CONFIG.styles.nodeRadiusWidth)
   .attr("class", "dot_green")
+  .attr("fill", "#AAD092")
   .attr('cx', cx)
   .attr('cy', cy)
   .attr("filter", "url(#blur.node)")
@@ -371,15 +375,16 @@ VIS.prototype.openMenu = function(cx, cy) {
 }
 
 
-$.fn.rotate = function(deg) {
-  $(this).css("transform", "rotate(" + deg + "deg)");
-  $(this).find("i").css("transform", "rotate(" + -1 * deg + "deg)");
-  $(this).css("-webkit-transform", "rotate(" + deg + "deg)");
-  $(this).find("i").css("-webkit-transform", "rotate(" + -1 * deg + "deg)");
-  $(this).css("-moz-transform", "rotate(" + deg + "deg)");
-  $(this).find("i").css("-moz-transform", "rotate(" + -1 * deg + "deg)");
-  $(this).css("-o-transform", "rotate(" + deg + "deg)");
-  $(this).find("i").css("-o-transform", "rotate(" + -1 * deg + "deg)");
+$.fn.rotate = function(x,y) {
+  // $(this).css("transform", "rotate(" + deg + "deg)");
+  // $(this).find("i").css("transform", "rotate(" + -1 * deg + "deg)");
+  // $(this).css("-webkit-transform", "rotate(" + deg + "deg)");
+  // $(this).find("i").css("-webkit-transform", "rotate(" + -1 * deg + "deg)");
+  // $(this).css("-moz-transform", "rotate(" + deg + "deg)");
+  // $(this).find("i").css("-moz-transform", "rotate(" + -1 * deg + "deg)");
+  // $(this).css("-o-transform", "rotate(" + deg + "deg)");
+  // $(this).find("i").css("-o-transform", "rotate(" + -1 * deg + "deg)");
+  $(this).css({top:x+'px', left:y+'px'});
 }
 
 /*
@@ -394,12 +399,17 @@ VIS.prototype.showThumbs = function() {
   initialDeg = CONFIG.radialMenu.initialDeg,
   n = $circle.find(".arm").length;
 
+  var increase = Math.PI * 2 / $circle.find(".arm").length,
+  var angle = 0,
+
   $circle.find(".arm").each(function(i, c) {
     i++;
 
-    var deg = (i * 360 / n) - initialDeg;
+    var x = 100 * Math.cos( angle ) + 200;
+    var y = 100 * Math.sin( angle ) + 200;
+    angle += increase;
 
-    $(c).rotate(deg);
+    $(c).rotate(x,y);
     $(c).delay(i * delay).animate({ width: CONFIG.radialMenu.armWidth }, { duration: CONFIG.radialMenu.armSpeed, easing: "easeOutQuad" });
 
     $(c).find("i").delay(i * delay).animate({
@@ -415,36 +425,36 @@ VIS.prototype.showThumbs = function() {
 */
 VIS.prototype.updateLines = function(scale) {
 
-  svg.select("#nodes")
+  svg.sets["nodes"]
   .selectAll(".hollow")
   .attr("r", CONFIG.styles.userRadiusWidth/scale)
   .style("stroke-width", CONFIG.styles.userStrokeWidth/scale)
 
-  svg.select("#beams")
+  svg.sets["beams"]
   .selectAll("circle")
   .attr("r", CONFIG.styles.beamRadiusWidth/scale)
 
-  svg.select("#cities")
+  svg.sets["cities"]
   .selectAll(".dot")
   .attr("r", CONFIG.styles.citiesRadiusWidth/scale)
 
-  svg.select("#cities_glow")
+  svg.sets["cities_glow"]
   .selectAll(".glow")
   .attr("r", CONFIG.styles.citiesGlowRadiusWidth/scale)
 
-  svg.select("#nodes")
+  svg.sets["nodes"]
   .selectAll(".green_glow")
   .attr("r", CONFIG.styles.nodeGlowRadiusWidth/scale)
 
-  svg.select("#nodes")
+  svg.sets["nodes"]
   .selectAll(".dot_green")
   .attr("r", CONFIG.styles.nodeRadiusWidth/scale)
 
-  svg.select("#lines")
+  svg.sets["lines"]
   .selectAll(".parabola_light")
   .attr("stroke-width", CONFIG.styles.parabolaLightStrokeWidth  / scale)
 
-  svg.select("#lines")
+  svg.sets["lines"]
   .selectAll(".parabola")
   .attr("stroke-width", CONFIG.styles.parabolaStrokeWidth / scale)
 }
@@ -536,31 +546,31 @@ VIS.prototype.transition = function(circle, path) {
 
   if (!this.direction[id]) this.direction[id] = 1;
 
-  circle
-  .transition()
-  .duration(800)
-  .style("opacity", .25)
-  .transition()
-  .duration(1500)
-  .delay(Math.round(Math.random(100) * 2500))
-  .style("opacity", .25)
-  .attrTween("transform", this.translateAlong(id, path.node()))
-  .each("end", function(t) {
+  // circle
+  // .transition()
+  // .duration(800)
+  // .style("opacity", .25)
+  // // .transition()
+  // .duration(1500)
+  // .delay(Math.round(Math.random(100) * 2500))
+  // .style("opacity", .25)
+  // .attrTween("transform", this.translateAlong(id, path.node()))
+  // .each("end", function(t) {
 
-    // Fade out the circle after it has stopped
+  //   // Fade out the circle after it has stopped
 
-    circle
-    .transition()
-    .duration(500)
-    .style("opacity", 0)
-    .each("end", function() {
+  //   circle
+  //   .transition()
+  //   .duration(500)
+  //   .style("opacity", 0)
+  //   .each("end", function() {
 
-      that.direction[id] = -1*that.direction[id]; // changes the direction
-      that.transition(circle, path);
+  //     that.direction[id] = -1*that.direction[id]; // changes the direction
+  //     that.transition(circle, path);
 
-    });
+  //   });
 
-  });
+  // });
 }
 
 VIS.prototype.drawParabola = function(p1, p2, c, animated) {
@@ -582,9 +592,17 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
   parabola.id       = this.GUID();
   parabola.bezier   = [];
   parabola["class"]    = c;
+  if (c === 'parabola_light') {
+    parabola.stroke = '#FFF'
+    parabola.opacity = 0.15
+  } else {
+    parabola.stroke = '#FFF'
+    parabola.opacity = 0.7
+
+  }
 
   parabola.path = svg
-  .select("#lines")
+  .sets["lines"]
   .data(parabola.orders)
   .selectAll("path.curve")
   .data(function(d) {
@@ -599,6 +617,8 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
   .enter()
   .append("path")
   .attr("class", parabola["class"])
+  .attr("stroke", parabola["stroke"])
+  .attr("opacity", parabola["opacity"])
   .attr("id", parabola.id)
   .attr("d", parabola.line)
   .attr("stroke-width", 1)
@@ -608,10 +628,10 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
 
   if (animated) {
     var circle = svg
-    .select("#beams")
+    .sets["beams"]
     .append("circle")
-    .attr("class", "beam")
-    .attr("filter", "url(#blur.beam)")
+  //   .attr("class", "beam")
+  //   .attr("filter", "url(#blur.beam)")
     .attr("r", CONFIG.styles.beamRadiusWidth);
 
     that.transition(circle, parabola.path);
@@ -695,7 +715,7 @@ VIS.prototype.loop = function() {
 
   });
 
-  svg.select("#nodes")
+  svg.sets["nodes"]
   .selectAll(".green_glow")
   .attr("r", radius)
   .attr("opacity", p);
@@ -717,7 +737,6 @@ VIS.prototype.loadCountries = function() {
 
   d3.json(CONFIG.sources.countries, function(collection) {
 
-    console.log(collection);
     that.geoPath = d3.geo.path().projection(that.projection)
 
     var st = svg.sets["states"].selectAll("path")
@@ -761,7 +780,6 @@ VIS.prototype.loadCentroids = function() {
     .attr('cx', function(d) { return that.projection([d.LONG, d.LAT])[0]; } )
     .attr('cy', function(d) { return that.projection([d.LONG, d.LAT])[1]; } )
     .attr("r", CONFIG.styles.citiesGlowRadiusWidth);
-
     svg.sets["cities"]
     .selectAll("circle")
     .data(collection)
@@ -790,14 +808,14 @@ VIS.prototype.loadCentroids = function() {
     // Draw some random parabolas
     that.drawParabolas(3);
 
-    // Draw the user's circle and connect it
+    // // Draw the user's circle and connect it
     var center = that.getRandomCenter();
 
     that.addUser(center);
 
-    for (var i = 0; i<= 2 + Math.round(Math.random() * 3); i++) {
-      // that.connectNode(center);
-    }
+     for (var i = 0; i<= 2 + Math.round(Math.random() * 3); i++) {
+       that.connectNode(center);
+     }
 
   });
 }
