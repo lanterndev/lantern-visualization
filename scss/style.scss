@@ -129,6 +129,7 @@ i { // as in "icon"
       margin: 0 1px 0 0;
       @include size(35px);
 
+      background: #000;
       background:rgba(0, 0, 0, .55);
 
       a {
@@ -261,12 +262,14 @@ circle {
   opacity:.1;
 }
 
-#states path {
-  stroke:none;
-  stroke-width:0.3;
-  fill:black;
-  opacity:.3;
-  opacity: 0;
+.states path  {
+  stroke: red;
+  /*stroke:none;*/
+  /*stroke-width:0.3;*/
+  /*fill:#fff;*/
+  /*stroke: blue;*/
+  /*opacity:.3;*/
+  /*opacity: 0;*/
 }
 
 .parabola_light {
