@@ -473,7 +473,6 @@ VIS.prototype.zoomIn = function(that) {
   // .transition()
   // .duration(CONFIG.zoomChangeSpeed)
   // .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
-  console.log(scale);
   svg.sets['root'][0][0].scale(2,2,x,y)
   that.updateLines(that.zoom.scale() + .2);
 }
@@ -498,7 +497,6 @@ VIS.prototype.zoomOut = function(that) {
   // .duration(CONFIG.zoomChangeSpeed)
   // .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
 
-  console.log(scale);
   svg.sets['root'][0][0].scale(0.5, 0.5,x,y)
   that.updateLines(that.zoom.scale() + .2);
 }
