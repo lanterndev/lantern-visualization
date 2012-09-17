@@ -181,7 +181,7 @@ VIS.prototype.init = function() {
   this.setupZoom();
 
   svg = d3.select("#canvas");
-  svg.paper = svg.raphael(480,600);
+  svg.paper = svg.raphael(980,1200);
   svg.sets = {},
   svg.sets['root'] = svg.paper.append('set');
 
@@ -464,21 +464,21 @@ VIS.prototype.zoomIn = function(that) {
   scale = that.zoom.scale(),
   t     = that.zoom.translate();
 
-  if (scale > 2) return;
+  if (scale > 4) return;
 
-  that.zoom.scale(scale + 1);
+  that.zoom.scale(scale * 2);
 
   var
   x = -250 * (that.zoom.scale() - 1),
   y = -250 * (that.zoom.scale() - 1);
 
   that.zoom.translate([x, y]);
-
-  // svg.paper
+  x=0;y=0;  // svg.paper
   // .transition()
   // .duration(CONFIG.zoomChangeSpeed)
   // .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
-
+  console.log(scale);
+  svg.sets['root'][0][0].scale(2,2,x,y)
   that.updateLines(that.zoom.scale() + .2);
 }
 
@@ -487,21 +487,23 @@ VIS.prototype.zoomOut = function(that) {
   scale = that.zoom.scale(),
   t     = that.zoom.translate();
 
-  if (scale < 1.5) return;
+  if (scale <= 1) return;
 
-  that.zoom.scale(scale - 1);
+  that.zoom.scale(scale / 2);
 
   var
   x = -250 * (that.zoom.scale() - 1),
   y = -250 * (that.zoom.scale() - 1);
-
+  x=0;y=0;
   that.zoom.translate([x, y]);
 
-  svg.paper
-  .transition()
-  .duration(CONFIG.zoomChangeSpeed)
-  .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
+  // svg.paper
+  // .transition()
+  // .duration(CONFIG.zoomChangeSpeed)
+  // .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
 
+  console.log(scale);
+  svg.sets['root'][0][0].scale(0.5, 0.5,x,y)
   that.updateLines(that.zoom.scale() + .2);
 }
 
@@ -631,6 +633,8 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
     .append("circle")
   //   .attr("class", "beam")
   //   .attr("filter", "url(#blur.beam)")
+    .attr("stroke",'#FFF')
+    .attr("stroke-width", 1)
     .attr("r", CONFIG.styles.beamRadiusWidth);
 
     that.transition(circle, parabola.path);
@@ -722,12 +726,12 @@ VIS.prototype.loop = function() {
 
 VIS.prototype.setupLayers = function() {
 
-  CONFIG.layers.states     = svg.sets['states'] = svg.paper.append('set').attr("id", "states");
-  CONFIG.layers.cities     = svg.sets['cities'] = svg.paper.append('set').attr("id", "cities");
-  CONFIG.layers.citiesGlow = svg.sets['cities_glow'] = svg.paper.append('set').attr("id", "cities_glow");
-  CONFIG.layers.lines      = svg.sets['lines'] = svg.paper.append('set').attr("id", "lines");
-  CONFIG.layers.beams      = svg.sets['beams'] = svg.paper.append('set').attr("id", "beams");
-  CONFIG.layers.nodes      = svg.sets['nodes'] = svg.paper.append('set').attr("id", "nodes");
+  CONFIG.layers.states     = svg.sets['states'] = svg.sets['root'].append('set').attr("id", "states");
+  CONFIG.layers.cities     = svg.sets['cities'] = svg.sets['root'].append('set').attr("id", "cities");
+  CONFIG.layers.citiesGlow = svg.sets['cities_glow'] = svg.sets['root'].append('set').attr("id", "cities_glow");
+  CONFIG.layers.lines      = svg.sets['lines'] = svg.sets['root'].append('set').attr("id", "lines");
+  CONFIG.layers.beams      = svg.sets['beams'] = svg.sets['root'].append('set').attr("id", "beams");
+  CONFIG.layers.nodes      = svg.sets['nodes'] = svg.sets['root'].append('set').attr("id", "nodes");
 
 }
 
