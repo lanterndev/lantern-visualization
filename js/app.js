@@ -30,6 +30,7 @@ CONFIG = {
     // opacity
     countriesOpacity: .3,
     censoredCountriesOpacity: .45,
+    censoredCountriesStrokeOpacity: .10,
 
     // parabolas
     parabolaLightStrokeWidth: 1,
@@ -382,7 +383,6 @@ $.fn.rotate = function(x,y) {
   // $(this).find("i").css("-moz-transform", "rotate(" + -1 * deg + "deg)");
   // $(this).css("-o-transform", "rotate(" + deg + "deg)");
   // $(this).find("i").css("-o-transform", "rotate(" + -1 * deg + "deg)");
-  $(this).css({top:y+'px', left:x+'px'});
 }
 
 /*
@@ -403,19 +403,15 @@ VIS.prototype.showThumbs = function() {
   $circle.find(".arm").each(function(i, c) {
     i++;
 
-    setTimeout(function() {
-      var x = 40 * Math.cos( angle ) +20;
-      var y = 40 * Math.sin( angle ) +45;
+      var // angle
+      x = 40 * Math.cos( angle ) + 20,
+      y = 40 * Math.sin( angle ) + 45;
+
       angle += increase;
 
-      $(c).rotate(x,y);
-      $(c).delay(i * delay).animate({ width: CONFIG.radialMenu.armWidth }, { duration: CONFIG.radialMenu.armSpeed, easing: "easeOutQuad" });
+      $(this).css({ width: CONFIG.radialMenu.armWidth + 'px', top: y + 'px', left: x + 'px'});
+      $(c).find("i").delay(i * delay).animate({ opacity: 1 });
 
-      $(c).find("i").delay(i * delay).animate({
-        opacity: 1
-      },
-      { duration: speed, easing: "easeOutQuad" });
-    }, 200);
   });
 }
 
@@ -738,25 +734,41 @@ VIS.prototype.loadCountries = function() {
 
     that.geoPath = d3.geo.path().projection(that.projection)
 
-    var st = svg.sets["states"].selectAll("path")
+    var st = svg.sets["states"]
+    .selectAll("path")
     .data(collection.features)
-    .enter().append("path")
+    .enter().append("path");
+
+    st
+    .attr("stroke", "none")
+    .attr("fill", "black")
+    .attr("opacity", .3)
     .attr("d", that.geoPath)
     .transition()
     .duration(700);
+
     setTimeout(function() {
-      st.style("opacity", function(d) {
+      st.attr("stroke", function(d) {
+
+        if (_.include(CONFIG.censoredCountries, d.properties.name)) return "#fff";
+        else return "none";
+
+      })
+      .attr("stroke-opacity", function(d) {
+
+        if (_.include(CONFIG.censoredCountries, d.properties.name)) return CONFIG.styles.censoredCountriesStrokeOpacity;
+        else return 0;
+
+      })
+      .attr("opacity", function(d) {
 
         if (_.include(CONFIG.censoredCountries, d.properties.name)) return CONFIG.styles.censoredCountriesOpacity;
         else return CONFIG.styles.countriesOpacity;
 
       })
-      .style("fill", function(d) {
 
-        if (d.properties.name == 'China') return 'black';
-
-      })
       that.loadCentroids();
+
     }, 700)
 
 

@@ -261,12 +261,14 @@ circle {
   opacity:.1;
 }
 
-#states path {
-  stroke:none;
-  stroke-width:0.3;
-  fill:black;
-  opacity:.3;
-  opacity: 0;
+.states path  {
+  stroke: red;
+  /*stroke:none;*/
+  /*stroke-width:0.3;*/
+  /*fill:#fff;*/
+  /*stroke: blue;*/
+  /*opacity:.3;*/
+  /*opacity: 0;*/
 }
 
 .parabola_light {
