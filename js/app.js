@@ -401,6 +401,8 @@ VIS.prototype.openMenu = function(cx, cy) {
 $.fn.rotate = function(deg) {
   $(this).css("transform", "rotate(" + deg + "deg)");
   $(this).find("i").css("transform", "rotate(" + -1 * deg + "deg)");
+  $(this).css("-ms-transform", "rotate(" + deg + "deg)");
+  $(this).find("i").css("-ms-transform", "rotate(" + -1 * deg + "deg)");
   $(this).css("-webkit-transform", "rotate(" + deg + "deg)");
   $(this).find("i").css("-webkit-transform", "rotate(" + -1 * deg + "deg)");
   $(this).css("-moz-transform", "rotate(" + deg + "deg)");
