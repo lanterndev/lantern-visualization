@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Circle Example</title>
+    <script type="text/javascript" src="../lib/d3/lib/sizzle/sizzle.js"></script>
+    <!--[if lte IE 8]>
+    <script type="text/javascript" src="../lib/compat/compat.js"></script>
+		<![endif]-->
+		<script src="../lib/raphael/raphael.js"></script>
+    <script src="../r2d3.v2.js"></script>
+  </head>
+  <body>
+		<div></div>
+		<div></div>
+		<script>
+			var svg = d3.select('div').raphael(200, 200),
+					data = d3.random.normal(50, 10),
+					fill = d3.scale.linear().domain([40,50,60]).range(['#ff0000', '#00ff00', '#0000ff']);
+
+			function drawCircle() {
+				var circles = svg.selectAll('circle').data([data()]);
+				circles.enter().append('circle')
+					.attr('cx', 100)
+					.attr('cy', 100)
+					.attr('stroke', 'none');
+				circles.transition()
+					.attr('r', function(d, i) { return d; })
+					.attr('fill', fill);
+				setTimeout(drawCircle, 1000);
+			}
+
+			drawCircle();
+		</script>
+  </body>
+</html>

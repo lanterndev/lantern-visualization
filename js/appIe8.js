@@ -1,5 +1,5 @@
 var vis = {};
-
+var svg = null;
 // Slow down animations
 d3.timer.frame_function(function(callback) {
     setTimeout(callback, 48); // FPS à la Peter Jackson
@@ -15,10 +15,7 @@ CONFIG = {
   radialMenuFadeOutSpeed: 200,
   layers: {},
 
-  // http://en.wikipedia.org/wiki/Censorship_by_country
   censoredCountries: [ "China", "Cuba", "Iran", "Myanmar", "Syria", "Turkmenistan", "Uzbekistan", "Vietnam", "Burma", "Bahrain", "Belarus", "Saudi Arabia", "N. Korea" ],
-
-  parabolaDrawingStep: .03,
 
   radialMenu: {
     delay: 100,
@@ -33,7 +30,7 @@ CONFIG = {
     // opacity
     countriesOpacity: .3,
     censoredCountriesOpacity: .45,
-    censoredCountriesStrokeOpacity: .45,
+    censoredCountriesStrokeOpacity: .10,
 
     // parabolas
     parabolaLightStrokeWidth: 1,
@@ -91,7 +88,7 @@ VIS.prototype.getLevels = function(parabola, d, t_) {
   return x;
 }
 
-VIS.prototype.getSlicedCurve = function getCurve(parabola, d) {
+VIS.prototype.getCurve2 = function getCurve(parabola, d) {
 
   var curve = parabola.bezier[d];
 
@@ -184,10 +181,14 @@ VIS.prototype.init = function() {
   this.setupProjection();
   this.setupZoom();
 
-  svg = d3.select("#canvas")
-  .append("svg")
-  .call(this.zoom)
-  .append("g");
+  svg = d3.select("#canvas");
+  svg.paper = svg.raphael(480,600);
+  svg.sets = {},
+  svg.sets['root'] = svg.paper.append('set');
+
+  // .append("svg")
+  // .call(this.zoom)
+  // .append("g");
 
   this.setupFilters(svg);
   this.setupLayers();
@@ -207,7 +208,7 @@ VIS.prototype.GUID = function()
   };
 
   return (
-    "d" + S4() + S4() + "-" +
+    S4() + S4() + "-" +
       S4() + "-" +
       S4() + "-" +
       S4() + "-" +
@@ -230,24 +231,14 @@ VIS.prototype.getRandomCenter = function() {
   return this.getCoordinates(this.centroids[i]);
 }
 
-/**
-* Connects the user with a random point
-*/
-VIS.prototype.connectUser = function() {
-  var end = this.getRandomCenter();
-
-  var parabolaID = this.drawParabola(this.userCoordinates, end, "parabola", true);
-  this.addNode(end, parabolaID);
-}
-
 /*
 * Connects two points with a parabola and adds a green node
 */
 VIS.prototype.connectNode = function(origin) {
   var end = this.getRandomCenter();
 
-  var parabolaID = this.drawParabola(origin, end, "parabola", true);
-  this.addNode(end, parabolaID);
+  this.drawParabola(origin, end, "parabola", true);
+  this.addNode(end);
 }
 
 /*
@@ -258,14 +249,12 @@ VIS.prototype.drawParabolas = function(n) {
   var
   j    = 0
   that = this;
-
   _.each(that.starts.slice(0, n), function(c) {
     j++;
 
     var
     origin = that.getCoordinates(c),
     end    = that.getRandomCenter();
-
     that.drawParabola(origin, end, "parabola_light", false);
 
     for (i = 0; i <= Math.round(Math.random()*5); i++) {
@@ -293,12 +282,14 @@ VIS.prototype.addUser = function(center) {
   .attr("r", CONFIG.styles.userRadiusWidth)
   .attr('cx', cx)
   .attr('cy', cy)
+  .attr('stroke', '#FF6666')
+  .attr('stroke-width', 1.5);
 }
 
 /*
 * Creates a node in the point define by *coordinates*
 */
-VIS.prototype.addNode = function(coordinates, id) {
+VIS.prototype.addNode = function(coordinates) {
 
   var
   layer = CONFIG.layers.nodes,
@@ -307,19 +298,11 @@ VIS.prototype.addNode = function(coordinates, id) {
   var
   cx = coordinates.x,
   cy = coordinates.y;
-
-  // Green glow
-  layer.append("circle")
-  .attr("class", "green_glow_2")
-  .attr('cx', cx)
-  .attr('cy', cy)
-  .attr("id", id + "_node")
-  .attr("filter", "url(#blur.green)")
-  .style("opacity", 0);
-
   // Green glow
   layer.append("circle")
   .attr("class", "green_glow")
+  .attr("fill", "#AAD092")
+  .attr("fill-opacity", '.25')
   .attr("r", CONFIG.styles.nodeGlowRadiusWidth)
   .attr('cx', cx)
   .attr('cy', cy)
@@ -329,17 +312,15 @@ VIS.prototype.addNode = function(coordinates, id) {
   layer.append("circle")
   .attr("r", CONFIG.styles.nodeRadiusWidth)
   .attr("class", "dot_green")
-  .style("opacity", 0)
+  .attr("fill", "#AAD092")
   .attr('cx', cx)
   .attr('cy', cy)
-  //.attr("id", id + "_node")
   .attr("filter", "url(#blur.node)")
   .on("click", function() {
     d3.event.stopPropagation();
 
     // Coordinates of the click adjusted to the zoom
     // level & translation vector
-
     var
     t = that.zoom.translate(),
     x = (that.zoom.scale() * cx) + t[0],
@@ -347,12 +328,7 @@ VIS.prototype.addNode = function(coordinates, id) {
 
     that.openMenu(x, y);
 
-  })
-  .transition()
-  .duration(500)
-  .style("opacity", 1)
-
-  this.updateLines(that.zoom.scale() + .2);
+  });
 }
 
 /*
@@ -398,15 +374,15 @@ VIS.prototype.openMenu = function(cx, cy) {
 }
 
 
-$.fn.rotate = function(deg) {
-  $(this).css("transform", "rotate(" + deg + "deg)");
-  $(this).find("i").css("transform", "rotate(" + -1 * deg + "deg)");
-  $(this).css("-webkit-transform", "rotate(" + deg + "deg)");
-  $(this).find("i").css("-webkit-transform", "rotate(" + -1 * deg + "deg)");
-  $(this).css("-moz-transform", "rotate(" + deg + "deg)");
-  $(this).find("i").css("-moz-transform", "rotate(" + -1 * deg + "deg)");
-  $(this).css("-o-transform", "rotate(" + deg + "deg)");
-  $(this).find("i").css("-o-transform", "rotate(" + -1 * deg + "deg)");
+$.fn.rotate = function(x,y) {
+  // $(this).css("transform", "rotate(" + deg + "deg)");
+  // $(this).find("i").css("transform", "rotate(" + -1 * deg + "deg)");
+  // $(this).css("-webkit-transform", "rotate(" + deg + "deg)");
+  // $(this).find("i").css("-webkit-transform", "rotate(" + -1 * deg + "deg)");
+  // $(this).css("-moz-transform", "rotate(" + deg + "deg)");
+  // $(this).find("i").css("-moz-transform", "rotate(" + -1 * deg + "deg)");
+  // $(this).css("-o-transform", "rotate(" + deg + "deg)");
+  // $(this).find("i").css("-o-transform", "rotate(" + -1 * deg + "deg)");
 }
 
 /*
@@ -421,18 +397,20 @@ VIS.prototype.showThumbs = function() {
   initialDeg = CONFIG.radialMenu.initialDeg,
   n = $circle.find(".arm").length;
 
+  var increase = Math.PI * 2 / $circle.find(".arm").length;
+  var angle = 0;
+
   $circle.find(".arm").each(function(i, c) {
     i++;
 
-    var deg = (i * 360 / n) - initialDeg;
+      var // angle
+      x = 40 * Math.cos( angle ) + 20,
+      y = 40 * Math.sin( angle ) + 45;
 
-    $(c).rotate(deg);
-    $(c).delay(i * delay).animate({ width: CONFIG.radialMenu.armWidth }, { duration: CONFIG.radialMenu.armSpeed, easing: "easeOutQuad" });
+      angle += increase;
 
-    $(c).find("i").delay(i * delay).animate({
-      opacity: 1
-    },
-    { duration: speed, easing: "easeOutQuad" });
+      $(this).css({ width: CONFIG.radialMenu.armWidth + 'px', top: y + 'px', left: x + 'px'});
+      $(c).find("i").delay(i * delay).animate({ opacity: 1 });
 
   });
 }
@@ -442,42 +420,38 @@ VIS.prototype.showThumbs = function() {
 */
 VIS.prototype.updateLines = function(scale) {
 
-  svg.select("#nodes")
+  svg.sets["nodes"]
   .selectAll(".hollow")
   .attr("r", CONFIG.styles.userRadiusWidth/scale)
   .style("stroke-width", CONFIG.styles.userStrokeWidth/scale)
 
-  svg.select("#beams")
+  svg.sets["beams"]
   .selectAll("circle")
   .attr("r", CONFIG.styles.beamRadiusWidth/scale)
 
-  svg.select("#cities")
+  svg.sets["cities"]
   .selectAll(".dot")
   .attr("r", CONFIG.styles.citiesRadiusWidth/scale)
 
-  svg.select("#cities_glow")
+  svg.sets["cities_glow"]
   .selectAll(".glow")
   .attr("r", CONFIG.styles.citiesGlowRadiusWidth/scale)
 
-  svg.select("#nodes")
-  .selectAll(".green_glow_2")
-  .attr("r", CONFIG.styles.nodeGlowRadiusWidth/scale)
-
-  svg.select("#nodes")
+  svg.sets["nodes"]
   .selectAll(".green_glow")
   .attr("r", CONFIG.styles.nodeGlowRadiusWidth/scale)
 
-  svg.select("#nodes")
+  svg.sets["nodes"]
   .selectAll(".dot_green")
   .attr("r", CONFIG.styles.nodeRadiusWidth/scale)
 
-  svg.select("#lines")
+  svg.sets["lines"]
   .selectAll(".parabola_light")
   .attr("stroke-width", CONFIG.styles.parabolaLightStrokeWidth  / scale)
 
-  svg.select("#lines")
+  svg.sets["lines"]
   .selectAll(".parabola")
-  .attr("stroke-width", CONFIG.styles.parabolaStrokeWidth / scale);
+  .attr("stroke-width", CONFIG.styles.parabolaStrokeWidth / scale)
 }
 
 VIS.prototype.zoomIn = function(that) {
@@ -486,21 +460,20 @@ VIS.prototype.zoomIn = function(that) {
   scale = that.zoom.scale(),
   t     = that.zoom.translate();
 
-  if (scale > 2) return;
+  if (scale > 4) return;
 
-  that.zoom.scale(scale + 1);
+  that.zoom.scale(scale * 2);
 
   var
   x = -250 * (that.zoom.scale() - 1),
   y = -250 * (that.zoom.scale() - 1);
 
   that.zoom.translate([x, y]);
-
-  svg
-  .transition()
-  .duration(CONFIG.zoomChangeSpeed)
-  .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
-
+  x=0;y=0;  // svg.paper
+  // .transition()
+  // .duration(CONFIG.zoomChangeSpeed)
+  // .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
+  svg.sets['root'][0][0].scale(2,2,x,y)
   that.updateLines(that.zoom.scale() + .2);
 }
 
@@ -509,21 +482,22 @@ VIS.prototype.zoomOut = function(that) {
   scale = that.zoom.scale(),
   t     = that.zoom.translate();
 
-  if (scale < 1.5) return;
+  if (scale <= 1) return;
 
-  that.zoom.scale(scale - 1);
+  that.zoom.scale(scale / 2);
 
   var
   x = -250 * (that.zoom.scale() - 1),
   y = -250 * (that.zoom.scale() - 1);
-
+  x=0;y=0;
   that.zoom.translate([x, y]);
 
-  svg
-  .transition()
-  .duration(CONFIG.zoomChangeSpeed)
-  .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
+  // svg.paper
+  // .transition()
+  // .duration(CONFIG.zoomChangeSpeed)
+  // .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
 
+  svg.sets['root'][0][0].scale(0.5, 0.5,x,y)
   that.updateLines(that.zoom.scale() + .2);
 }
 
@@ -559,59 +533,39 @@ VIS.prototype.translateAlong = function(id, path) {
   };
 }
 
-VIS.prototype.transition = function(circle, parabola) {
+VIS.prototype.transition = function(circle, path) {
 
   var that = this;
 
+  var id = path.attr("id");
 
-  if (!this.direction[parabola.id]) this.direction[parabola.id] = 1;
+  if (!this.direction[id]) this.direction[id] = 1;
 
-  circle
-  .transition()
-  .duration(800)
-  .style("opacity", .25)
-  .transition()
-  .duration(1500)
-  .delay(Math.round(Math.random(100) * 2500))
-  .style("opacity", .25)
-  .attrTween("transform", this.translateAlong(parabola.id, parabola.path.node()))
-  .each("end", function(t) {
+  // circle
+  // .transition()
+  // .duration(800)
+  // .style("opacity", .25)
+  // // .transition()
+  // .duration(1500)
+  // .delay(Math.round(Math.random(100) * 2500))
+  // .style("opacity", .25)
+  // .attrTween("transform", this.translateAlong(id, path.node()))
+  // .each("end", function(t) {
 
-    // Fade out the circle after it has stopped
+  //   // Fade out the circle after it has stopped
 
-    circle
-    .transition()
-    .duration(500)
-    .style("opacity", 0)
-    .each("end", function() {
+  //   circle
+  //   .transition()
+  //   .duration(500)
+  //   .style("opacity", 0)
+  //   .each("end", function() {
 
-      that.direction[parabola.id] = -1*that.direction[parabola.id]; // changes the direction
+  //     that.direction[id] = -1*that.direction[id]; // changes the direction
+  //     that.transition(circle, path);
 
-      if (that.direction[parabola.id] == 1) {
-        svg.select("#" + parabola.id + "_node")
-        .transition()
-        .duration(500)
-        .style("opacity", .5)
-        .each("end", function(t) {
+  //   });
 
-          d3.select(this).transition()
-          .duration(500)
-          .style("opacity", 0);
-
-        });
-      }
-
-
-
-      that.transition(circle, parabola);
-
-
-
-
-
-    });
-
-  });
+  // });
 }
 
 VIS.prototype.drawParabola = function(p1, p2, c, animated) {
@@ -632,16 +586,24 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
   parabola.orders   = d3.range(3, 4);
   parabola.id       = this.GUID();
   parabola.bezier   = [];
-  parabola.c        = c;
+  parabola["class"]    = c;
+  if (c === 'parabola_light') {
+    parabola.stroke = '#FFF'
+    parabola.opacity = 0.15
+  } else {
+    parabola.stroke = '#FFF'
+    parabola.opacity = 0.7
+
+  }
 
   parabola.path = svg
-  .select("#lines")
+  .sets["lines"]
   .data(parabola.orders)
   .selectAll("path.curve")
   .data(function(d) {
 
     if (animated) {
-      return that.getSlicedCurve(parabola, d);
+      return that.getCurve2(parabola, d);
     } else {
       return that.getCurve(parabola, d);
     }
@@ -649,7 +611,9 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
   })
   .enter()
   .append("path")
-  .attr("class", parabola.c)
+  .attr("class", parabola["class"])
+  .attr("stroke", parabola["stroke"])
+  .attr("opacity", parabola["opacity"])
   .attr("id", parabola.id)
   .attr("d", parabola.line)
   .attr("stroke-width", 1)
@@ -659,17 +623,16 @@ VIS.prototype.drawParabola = function(p1, p2, c, animated) {
 
   if (animated) {
     var circle = svg
-    .select("#beams")
+    .sets["beams"]
     .append("circle")
-    .attr("class", "beam")
-    .attr("filter", "url(#blur.beam)")
+  //   .attr("class", "beam")
+  //   .attr("filter", "url(#blur.beam)")
+    .attr("stroke",'#FFF')
+    .attr("stroke-width", 1)
     .attr("r", CONFIG.styles.beamRadiusWidth);
 
-    that.transition(circle, parabola);
+    that.transition(circle, parabola.path);
   }
-
-  this.updateLines(that.zoom.scale() + .2);
-  return parabola.id
 }
 
 /*
@@ -730,16 +693,15 @@ VIS.prototype.loop = function() {
   p       = Math.abs(Math.sin(this.t)),
   radius  = 6 + p*4/this.scale;
 
-
   _.each(this.parabolas, function(parabola) {
 
     if (parabola.animated && parabola.t < 1) {
 
-      parabola.t += CONFIG.parabolaDrawingStep;
+      parabola.t += .03;
 
       var curve = parabola.path
       .data(function(d) {
-        return that.getSlicedCurve(parabola, d);
+        return that.getCurve2(parabola, d);
       })
 
       curve.enter()
@@ -750,21 +712,20 @@ VIS.prototype.loop = function() {
 
   });
 
-  svg.select("#nodes")
+  svg.sets["nodes"]
   .selectAll(".green_glow")
   .attr("r", radius)
   .attr("opacity", p);
-
 }
 
 VIS.prototype.setupLayers = function() {
 
-  CONFIG.layers.states     = svg.append("g").attr("id", "states");
-  CONFIG.layers.cities     = svg.append("g").attr("id", "cities");
-  CONFIG.layers.citiesGlow = svg.append("g").attr("id", "cities_glow");
-  CONFIG.layers.lines      = svg.append("g").attr("id", "lines");
-  CONFIG.layers.beams      = svg.append("g").attr("id", "beams");
-  CONFIG.layers.nodes      = svg.append("g").attr("id", "nodes");
+  CONFIG.layers.states     = svg.sets['states'] = svg.sets['root'].append('set').attr("id", "states");
+  CONFIG.layers.cities     = svg.sets['cities'] = svg.sets['root'].append('set').attr("id", "cities");
+  CONFIG.layers.citiesGlow = svg.sets['cities_glow'] = svg.sets['root'].append('set').attr("id", "cities_glow");
+  CONFIG.layers.lines      = svg.sets['lines'] = svg.sets['root'].append('set').attr("id", "lines");
+  CONFIG.layers.beams      = svg.sets['beams'] = svg.sets['root'].append('set').attr("id", "beams");
+  CONFIG.layers.nodes      = svg.sets['nodes'] = svg.sets['root'].append('set').attr("id", "nodes");
 
 }
 
@@ -775,38 +736,43 @@ VIS.prototype.loadCountries = function() {
 
     that.geoPath = d3.geo.path().projection(that.projection)
 
-    svg.select("#states")
+    var st = svg.sets["states"]
     .selectAll("path")
     .data(collection.features)
-    .enter().append("path")
+    .enter().append("path");
+
+    st
+    .attr("stroke", "none")
+    .attr("fill", "black")
+    .attr("opacity", .3)
     .attr("d", that.geoPath)
     .transition()
-    .duration(700)
-    .style("stroke", function(d) {
+    .duration(700);
 
-      if (_.include(CONFIG.censoredCountries, d.properties.name)) return "#fff";
-      else return "none";
+    setTimeout(function() {
+      st.attr("stroke", function(d) {
 
-    })
-    .style("stroke-opacity", function(d) {
+        if (_.include(CONFIG.censoredCountries, d.properties.name)) return "#fff";
+        else return "none";
 
-      if (_.include(CONFIG.censoredCountries, d.properties.name)) return CONFIG.styles.censoredCountriesStrokeOpacity;
-      else return 0;
+      })
+      .attr("stroke-opacity", function(d) {
 
-    })
-    .style("opacity", function(d) {
+        if (_.include(CONFIG.censoredCountries, d.properties.name)) return CONFIG.styles.censoredCountriesStrokeOpacity;
+        else return 0;
 
-      if (_.include(CONFIG.censoredCountries, d.properties.name)) return CONFIG.styles.censoredCountriesOpacity;
-      else return CONFIG.styles.countriesOpacity;
+      })
+      .attr("opacity", function(d) {
 
-    })
-    .style("fill", function(d) {
+        if (_.include(CONFIG.censoredCountries, d.properties.name)) return CONFIG.styles.censoredCountriesOpacity;
+        else return CONFIG.styles.countriesOpacity;
 
-      if (d.properties.name == 'China') return 'black';
+      })
 
-    })
+      that.loadCentroids();
 
-    that.loadCentroids();
+    }, 700)
+
 
   });
 }
@@ -817,7 +783,7 @@ VIS.prototype.loadCentroids = function() {
 
   d3.csv(CONFIG.sources.centroids, function(collection) {
 
-    svg.select("#cities_glow")
+    var a = svg.sets["cities_glow"]
     .selectAll("circle")
     .data(collection)
     .enter()
@@ -827,8 +793,7 @@ VIS.prototype.loadCentroids = function() {
     .attr('cx', function(d) { return that.projection([d.LONG, d.LAT])[0]; } )
     .attr('cy', function(d) { return that.projection([d.LONG, d.LAT])[1]; } )
     .attr("r", CONFIG.styles.citiesGlowRadiusWidth);
-
-    svg.select("#cities")
+    svg.sets["cities"]
     .selectAll("circle")
     .data(collection)
     .enter()
@@ -856,16 +821,14 @@ VIS.prototype.loadCentroids = function() {
     // Draw some random parabolas
     that.drawParabolas(3);
 
-    // Draw the user's circle and connect it
+    // // Draw the user's circle and connect it
     var center = that.getRandomCenter();
-
-    that.userCoordinates = center;
 
     that.addUser(center);
 
-    for (var i = 0; i<= 2 + Math.round(Math.random() * 3); i++) {
-      that.connectUser();
-    }
+     for (var i = 0; i<= 2 + Math.round(Math.random() * 3); i++) {
+       that.connectNode(center);
+     }
 
   });
 }
