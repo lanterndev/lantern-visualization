@@ -306,8 +306,6 @@ VIS.prototype.addNode = function(coordinates) {
   .attr('cx', cx)
   .attr('cy', cy)
   .attr("filter", "url(#blur.green)")
-  console.log(cx);
-  console.log(cy);
 
   // Green dot
   layer.append("circle")
@@ -384,7 +382,7 @@ $.fn.rotate = function(x,y) {
   // $(this).find("i").css("-moz-transform", "rotate(" + -1 * deg + "deg)");
   // $(this).css("-o-transform", "rotate(" + deg + "deg)");
   // $(this).find("i").css("-o-transform", "rotate(" + -1 * deg + "deg)");
-  $(this).css({top:x+'px', left:y+'px'});
+  $(this).css({top:y+'px', left:x+'px'});
 }
 
 /*
@@ -399,24 +397,25 @@ VIS.prototype.showThumbs = function() {
   initialDeg = CONFIG.radialMenu.initialDeg,
   n = $circle.find(".arm").length;
 
-  var increase = Math.PI * 2 / $circle.find(".arm").length,
-  var angle = 0,
+  var increase = Math.PI * 2 / $circle.find(".arm").length;
+  var angle = 0;
 
   $circle.find(".arm").each(function(i, c) {
     i++;
 
-    var x = 100 * Math.cos( angle ) + 200;
-    var y = 100 * Math.sin( angle ) + 200;
-    angle += increase;
+    setTimeout(function() {
+      var x = 40 * Math.cos( angle ) +20;
+      var y = 40 * Math.sin( angle ) +45;
+      angle += increase;
 
-    $(c).rotate(x,y);
-    $(c).delay(i * delay).animate({ width: CONFIG.radialMenu.armWidth }, { duration: CONFIG.radialMenu.armSpeed, easing: "easeOutQuad" });
+      $(c).rotate(x,y);
+      $(c).delay(i * delay).animate({ width: CONFIG.radialMenu.armWidth }, { duration: CONFIG.radialMenu.armSpeed, easing: "easeOutQuad" });
 
-    $(c).find("i").delay(i * delay).animate({
-      opacity: 1
-    },
-    { duration: speed, easing: "easeOutQuad" });
-
+      $(c).find("i").delay(i * delay).animate({
+        opacity: 1
+      },
+      { duration: speed, easing: "easeOutQuad" });
+    }, 200);
   });
 }
 
@@ -475,10 +474,10 @@ VIS.prototype.zoomIn = function(that) {
 
   that.zoom.translate([x, y]);
 
-  svg
-  .transition()
-  .duration(CONFIG.zoomChangeSpeed)
-  .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
+  // svg.paper
+  // .transition()
+  // .duration(CONFIG.zoomChangeSpeed)
+  // .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
 
   that.updateLines(that.zoom.scale() + .2);
 }
@@ -498,7 +497,7 @@ VIS.prototype.zoomOut = function(that) {
 
   that.zoom.translate([x, y]);
 
-  svg
+  svg.paper
   .transition()
   .duration(CONFIG.zoomChangeSpeed)
   .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
