@@ -182,7 +182,7 @@ VIS.prototype.init = function() {
   this.setupZoom();
 
   svg = d3.select("#canvas");
-  svg.paper = svg.raphael(980,1200);
+  svg.paper = svg.raphael(480,600);
   svg.sets = {},
   svg.sets['root'] = svg.paper.append('set');
 
