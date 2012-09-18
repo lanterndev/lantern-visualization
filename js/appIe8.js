@@ -792,7 +792,11 @@ VIS.prototype.loadCentroids = function() {
     .attr("class", "glow")
     .attr('cx', function(d) { return that.projection([d.LONG, d.LAT])[0]; } )
     .attr('cy', function(d) { return that.projection([d.LONG, d.LAT])[1]; } )
-    .attr("r", CONFIG.styles.citiesGlowRadiusWidth);
+    .attr("fill", "#fff")
+    .attr("stroke", "#fff")
+    .attr("fill-opacity", .7)
+    .attr("stroke-opacity", .7)
+    .attr("r", 1.5);
     svg.sets["cities"]
     .selectAll("circle")
     .data(collection)
