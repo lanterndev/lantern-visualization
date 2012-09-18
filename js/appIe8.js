@@ -186,10 +186,6 @@ VIS.prototype.init = function() {
   svg.sets = {},
   svg.sets['root'] = svg.paper.append('set');
 
-  // .append("svg")
-  // .call(this.zoom)
-  // .append("g");
-
   this.setupFilters(svg);
   this.setupLayers();
 
@@ -373,18 +369,6 @@ VIS.prototype.openMenu = function(cx, cy) {
   });
 }
 
-
-$.fn.rotate = function(x,y) {
-  // $(this).css("transform", "rotate(" + deg + "deg)");
-  // $(this).find("i").css("transform", "rotate(" + -1 * deg + "deg)");
-  // $(this).css("-webkit-transform", "rotate(" + deg + "deg)");
-  // $(this).find("i").css("-webkit-transform", "rotate(" + -1 * deg + "deg)");
-  // $(this).css("-moz-transform", "rotate(" + deg + "deg)");
-  // $(this).find("i").css("-moz-transform", "rotate(" + -1 * deg + "deg)");
-  // $(this).css("-o-transform", "rotate(" + deg + "deg)");
-  // $(this).find("i").css("-o-transform", "rotate(" + -1 * deg + "deg)");
-}
-
 /*
 * Shows the radial menu thumbs
 */
@@ -492,11 +476,6 @@ VIS.prototype.zoomOut = function(that) {
   x=0;y=0;
   that.zoom.translate([x, y]);
 
-  // svg.paper
-  // .transition()
-  // .duration(CONFIG.zoomChangeSpeed)
-  // .attr("transform", "translate(" + x + "," + y + ") scale(" + that.zoom.scale() + ")");
-
   svg.sets['root'][0][0].scale(0.5, 0.5,x,y)
   that.updateLines(that.zoom.scale() + .2);
 }
@@ -540,32 +519,6 @@ VIS.prototype.transition = function(circle, path) {
   var id = path.attr("id");
 
   if (!this.direction[id]) this.direction[id] = 1;
-
-  // circle
-  // .transition()
-  // .duration(800)
-  // .style("opacity", .25)
-  // // .transition()
-  // .duration(1500)
-  // .delay(Math.round(Math.random(100) * 2500))
-  // .style("opacity", .25)
-  // .attrTween("transform", this.translateAlong(id, path.node()))
-  // .each("end", function(t) {
-
-  //   // Fade out the circle after it has stopped
-
-  //   circle
-  //   .transition()
-  //   .duration(500)
-  //   .style("opacity", 0)
-  //   .each("end", function() {
-
-  //     that.direction[id] = -1*that.direction[id]; // changes the direction
-  //     that.transition(circle, path);
-
-  //   });
-
-  // });
 }
 
 VIS.prototype.drawParabola = function(p1, p2, c, animated) {
