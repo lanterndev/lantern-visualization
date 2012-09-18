@@ -9,15 +9,18 @@
   </head>
 
   <body onload="start();">
+
+
+
     <div class="chrome">
-      <header>
-      <div class="inner">
-        <ul>
-          <li class="user"><a href="#">saleiva@gmail.com <i></i></a></li>
-          <li class="status ok">giving access <i></i></li>
-        </ul>
+      <div class="header">
+        <div class="inner">
+          <ul>
+            <li class="user"><a href="#">saleiva@gmail.com <i></i></a></li>
+            <li class="status ok">giving access <i></i></li>
+          </ul>
+        </div>
       </div>
-      </header>
       <div id="lines"></div>
       <div id="canvas">
         <div class="message">
@@ -39,19 +42,35 @@
         </ul>
 
       </div>
-      <footer>
-      <div class="inner">861 users &amp; 71,034,361 kilobytes served by the network</div>
-      </footer>
+      <div class="footer">
+        <div class="inner">861 users & 71,034,361 kilobytes served by the network</div>
+      </div>
       <div class="radial-menu"></div>
     </div>
-    
-    <!--<script src="js/vendor/jquery-1.7.2.min.js" type="text/javascript" charset="utf-8"></script>-->
-    <!--<script src="js/vendor/d3.v2.min.js" type="text/javascript" charset="utf-8"></script>-->
-    <!--<script src="js/vendor/underscore-min.js" type="text/javascript" charset="utf-8"></script>-->
-    <!--<script src="js/vendor/jquery.easing.1.3.js" type="text/javascript" charset="utf-8"></script>-->
-    <!--<script src="js/app.js" type="text/javascript" charset="utf-8"></script>-->
 
-    <script src="js/all.js" type="text/javascript" charset="utf-8"></script>
+
+    <script src="js/vendor/jquery-1.7.2.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/vendor/underscore-min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/vendor/jquery.easing.1.3.js" type="text/javascript" charset="utf-8"></script>
+
+
+    <!--[if lt IE 9]>
+    <script src="js/vendor/sizzle.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/vendor/r2d3/lib/compat/compat.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/vendor/r2d3/lib/d3/d3.v2.10.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/vendor/r2d3/lib/raphael/raphael.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/vendor/r2d3/r2d3.v2.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/appIe8.js" type="text/javascript" charset="utf-8"></script>
+
+    <![endif]-->
+    <!--[if gte IE 9]>
+    <script src="js/vendor/d3.v2.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/app.js" type="text/javascript" charset="utf-8"></script>
+    <![endif]-->
+    <!--[if !IE]> -->
+    <script src="js/vendor/d3.v2.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/app.js" type="text/javascript" charset="utf-8"></script>
+    <!-- <![endif]-->
 
   </body>
 </html>
