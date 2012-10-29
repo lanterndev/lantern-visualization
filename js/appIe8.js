@@ -1,3 +1,4 @@
+// XXX TODO factor out code repeated in app.js
 var vis = {};
 var svg = null;
 // Slow down animations

@@ -1,9 +1,12 @@
 @import compass/reset
 @import helpers
 
+html
+  :height 100%
+
 body
+  :height 100%
   :background #111
-  :padding 40px
   :text-rendering optimizeLegibility
 
 i
@@ -11,18 +14,19 @@ i
   :display block
 
 // Sprites
-@import icons/*.png
-
-/*
+//@import icons/*.png
 
 .chrome
   // Basic chrome
-  $chromeWidth: 520px
+  $chromeWidth: 1024px
   $chromeHeight: 629px
-  $shadowWidth: 18px
-  $shadowHeight: 18px
+  //$shadowWidth: 18px
+  $shadowWidth: 0px
+  //$shadowHeight: 18px
+  $shadowHeight: 0px
   // .header
-  $headerTop: 41px
+  //$headerTop: 41px
+  $headerTop: 0px
   $headerWidth: $chromeWidth - $shadowWidth * 2
   $headerHeight: 51px
   $headerShadowHeight: 13px
@@ -31,28 +35,36 @@ i
   $footerWidth: $chromeWidth - $shadowWidth * 2
   $footerHeight: 59px
   $footerLeft: $shadowWidth
-  $footerBottom: $shadowHeight
+  //$footerBottom: $shadowHeight
+  $footerBottom: 0px
   // lines
   $linesTop: $headerTop + $headerHeight - $headerShadowHeight
   $linesLeft: $shadowWidth
   :position relative
-  +size($chromeWidth, $chromeHeight)
-  :margin auto
+  //+size($chromeWidth, $chromeHeight)
+  :height 100%
+  //:margin auto
   :overflow hidden
-  +icons-sprite(bg-chrome)
+  //+icons-sprite(bg-chrome)
+  :background url('../img/bg/bg.png')
   #canvas
     +position($headerTop + $headerHeight - $headerShadowHeight, false, false, $shadowWidth)
-    +size($chromeWidth - $shadowWidth * 2, $chromeHeight - $footerHeight - $headerHeight - $shadowHeight * 2)
+    //+size($chromeWidth - $shadowWidth * 2, $chromeHeight - $footerHeight - $headerHeight - $shadowHeight * 2)
+    +size(100%, 100%)
     :z-index $zTop + 1
     :overflow hidden
   .header
     +position($headerTop, false, false, $headerLeft)
-    +size($headerWidth, $headerHeight)
-    +icons-sprite(bg-chrome-header)
+    //+size($headerWidth, $headerHeight)
+    +size(100%, $headerHeight)
+    //+icons-sprite(bg-chrome-header)
+    :background url('../img/bg/bg-chrome-header.png')
   .footer
     +position(false, false, $footerBottom, $footerLeft)
-    +size($footerWidth, $footerHeight)
-    +icons-sprite(bg-chrome-footer)
+    //+size($footerWidth, $footerHeight)
+    +size(100%, $footerHeight)
+    //+icons-sprite(bg-chrome-footer)
+    :background url('../img/bg/bg-chrome-footer.png')
   #lines
     +position($linesTop, false, false, $linesLeft)
     +size($chromeWidth - $shadowWidth * 2, $chromeHeight - $linesTop - $footerHeight - $footerBottom)
@@ -75,9 +87,14 @@ i
       i
         +inline-block
       &.user
-        :float left
-      &.status
         :float right
+        &.gtalkConnectivity.connected i
+          +size(19px)
+          //+icons-sprite(status-ok)
+          :background url('../img/icons/status-ok.png')
+    //
+      &.status
+        :float left
         :color $cGray3
         &.ok i
           +size(19px)
@@ -146,7 +163,8 @@ i
   i
     :margin 0 auto 10px auto
     +size(16px, 17px)
-    +icons-sprite(connected)
+    //+icons-sprite(connected)
+    :background url(../img/icons/connected.png)
 
 // Other elements
 
@@ -237,7 +255,9 @@ circle
   :position absolute
   +size(119px)
   /*pointer-events: none;
-  +icons-sprite(circle)
+  //+icons-sprite(circle)
+  :background-color rgba(255, 255, 255, .65)
+  +border-radius(5px)
   :z-index 5500
   .arm
     +size(0px, 26px)

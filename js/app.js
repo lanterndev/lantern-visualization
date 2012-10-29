@@ -6,9 +6,12 @@ d3.timer.frame_function(function(callback) {
 });
 
 CONFIG = {
-  scale: 500,
-  translate: [240, 300],
-  zoomContraints: [1, 3], // min & max zoom levels
+//scale: 500,
+  scale: 1000,
+//translate: [240, 300],
+  translate: [500, 350],
+//zoomContraints: [1, 3], // min & max zoom levels
+  zoomContraints: [.5, 6], // min & max zoom levels
   zoomChangeSpeed: 500,
   beamSpeed: 500,
   radialMenuFadeInSpeed: 200,
@@ -391,7 +394,7 @@ VIS.prototype.openMenu = function(cx, cy) {
 
     $(this).fadeIn(CONFIG.radialMenuFadeInSpeed, "easeInQuad", function() {
       $(this).addClass("zoom");
-      that.showThumbs();
+      //that.showThumbs();
     });
 
   });

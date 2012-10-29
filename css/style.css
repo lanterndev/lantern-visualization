@@ -175,93 +175,90 @@ article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, 
 }
 
 /* line 4, ../sass/style.sass */
+html {
+  height: 100%;
+}
+
+/* line 7, ../sass/style.sass */
 body {
+  height: 100%;
   background: #111111;
-  padding: 40px;
   text-rendering: optimizeLegibility;
 }
 
-/* line 9, ../sass/style.sass */
+/* line 12, ../sass/style.sass */
 i {
   display: block;
 }
 
-/* line 138, icons/*.png */
-.icons-sprite, .chrome, .chrome .header, .chrome .footer, .chrome .header ul li.status.ok i, .chrome #canvas .message i, .radial-menu {
-  background: url('../img/icons-s298e839c64.png') no-repeat;
-}
-
-/* */
-/* line 18, ../sass/style.sass */
+/* line 19, ../sass/style.sass */
 .chrome {
   position: relative;
-  width: 520px;
-  height: 629px;
-  margin: auto;
+  height: 100%;
   overflow: hidden;
-  background-position: 0 0;
+  background: url("../img/bg/bg.png");
 }
-/* line 43, ../sass/style.sass */
+/* line 50, ../sass/style.sass */
 .chrome #canvas {
   position: absolute;
-  top: 79px;
-  left: 18px;
-  width: 484px;
-  height: 483px;
+  top: 38px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
   z-index: 1001;
   overflow: hidden;
 }
-/* line 48, ../sass/style.sass */
+/* line 56, ../sass/style.sass */
 .chrome .header {
   position: absolute;
-  top: 41px;
-  left: 18px;
-  width: 484px;
+  top: 0px;
+  left: 0px;
+  width: 100%;
   height: 51px;
-  background-position: 0 -688px;
+  background: url("../img/bg/bg-chrome-header.png");
 }
-/* line 52, ../sass/style.sass */
+/* line 62, ../sass/style.sass */
 .chrome .footer {
   position: absolute;
-  bottom: 18px;
-  left: 18px;
-  width: 484px;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
   height: 59px;
-  background-position: 0 -629px;
+  background: url("../img/bg/bg-chrome-footer.png");
 }
-/* line 56, ../sass/style.sass */
+/* line 68, ../sass/style.sass */
 .chrome #lines {
   position: absolute;
-  top: 79px;
-  left: 18px;
-  width: 484px;
-  height: 473px;
+  top: 38px;
+  left: 0px;
+  width: 1024px;
+  height: 532px;
   z-index: 1000;
 }
 
-/* line 64, ../sass/style.sass */
+/* line 76, ../sass/style.sass */
 .chrome .header .inner {
   padding: 10px;
 }
-/* line 66, ../sass/style.sass */
+/* line 78, ../sass/style.sass */
 .chrome .header ul {
   clear: both;
   overflow: hidden;
 }
-/* line 69, ../sass/style.sass */
+/* line 81, ../sass/style.sass */
 .chrome .header ul li {
   text-shadow: black 0px 1px 1px;
 }
-/* line 71, ../sass/style.sass */
+/* line 83, ../sass/style.sass */
 .chrome .header ul li, .chrome .header ul li a {
   color: white;
   font-size: 13px;
 }
-/* line 73, ../sass/style.sass */
+/* line 85, ../sass/style.sass */
 .chrome .header ul li a {
   text-decoration: none;
 }
-/* line 75, ../sass/style.sass */
+/* line 87, ../sass/style.sass */
 .chrome .header ul li i {
   display: -moz-inline-stack;
   display: inline-block;
@@ -270,40 +267,35 @@ i {
   zoom: 1;
   *display: inline;
 }
-/* line 77, ../sass/style.sass */
+/* line 89, ../sass/style.sass */
 .chrome .header ul li.user {
-  float: left;
-}
-/* line 79, ../sass/style.sass */
-.chrome .header ul li.status {
   float: right;
-  color: #999999;
 }
-/* line 82, ../sass/style.sass */
-.chrome .header ul li.status.ok i {
+/* line 91, ../sass/style.sass */
+.chrome .header ul li.user.gtalkConnectivity.connected i {
   width: 19px;
   height: 19px;
-  background-position: 0 -958px;
+  background: url("../img/icons/status-ok.png");
 }
 
-/* line 87, ../sass/style.sass */
+/* line 104, ../sass/style.sass */
 .chrome #canvas .controls {
   clear: both;
   overflow: hidden;
 }
-/* line 88, ../sass/style.sass */
+/* line 105, ../sass/style.sass */
 .chrome #canvas .controls#zoom {
   position: absolute;
   bottom: 20px;
   left: 20px;
 }
-/* line 90, ../sass/style.sass */
+/* line 107, ../sass/style.sass */
 .chrome #canvas .controls#options {
   position: absolute;
   right: 20px;
   bottom: 20px;
 }
-/* line 94, ../sass/style.sass */
+/* line 111, ../sass/style.sass */
 .chrome #canvas .controls li {
   float: left;
   margin: 0 1px 0 0;
@@ -312,7 +304,7 @@ i {
   background: black;
   background: rgba(0, 0, 0, 0.55);
 }
-/* line 100, ../sass/style.sass */
+/* line 117, ../sass/style.sass */
 .chrome #canvas .controls li a {
   width: 100%;
   height: 100%;
@@ -323,47 +315,47 @@ i {
   transition: opacity 300ms ease-in-out;
   opacity: 0.5;
 }
-/* line 105, ../sass/style.sass */
+/* line 122, ../sass/style.sass */
 .chrome #canvas .controls li a:hover {
   opacity: 1;
 }
-/* line 107, ../sass/style.sass */
+/* line 124, ../sass/style.sass */
 .chrome #canvas .controls li.selected a {
   opacity: 1;
 }
-/* line 109, ../sass/style.sass */
+/* line 126, ../sass/style.sass */
 .chrome #canvas .controls li.disabled a {
   cursor: default;
 }
-/* line 111, ../sass/style.sass */
+/* line 128, ../sass/style.sass */
 .chrome #canvas .controls li.disabled a:hover {
   opacity: 0.5;
 }
-/* line 113, ../sass/style.sass */
+/* line 130, ../sass/style.sass */
 .chrome #canvas .controls li.zoom_out a {
   background: url(../img/icons/minus.png) no-repeat 50% 50%;
 }
-/* line 115, ../sass/style.sass */
+/* line 132, ../sass/style.sass */
 .chrome #canvas .controls li.magnifier a {
   background: url(../img/icons/magnifier.png) no-repeat 50% 50%;
 }
-/* line 117, ../sass/style.sass */
+/* line 134, ../sass/style.sass */
 .chrome #canvas .controls li.zoom_in a {
   background: url(../img/icons/plus.png) no-repeat 50% 50%;
 }
-/* line 119, ../sass/style.sass */
+/* line 136, ../sass/style.sass */
 .chrome #canvas .controls li.graph a {
   background: url(../img/icons/speedometer.png) no-repeat 50% 50%;
 }
-/* line 121, ../sass/style.sass */
+/* line 138, ../sass/style.sass */
 .chrome #canvas .controls li.users a {
   background: url(../img/icons/users.png) no-repeat 50% 50%;
 }
-/* line 123, ../sass/style.sass */
+/* line 140, ../sass/style.sass */
 .chrome #canvas .controls li.settings a {
   background: url(../img/icons/gears.png) no-repeat 50% 50%;
 }
-/* line 125, ../sass/style.sass */
+/* line 142, ../sass/style.sass */
 .chrome #canvas .controls li:first-child {
   -webkit-border-radius: 3px 0 0 3px;
   -moz-border-radius: 3px 0 0 3px;
@@ -371,7 +363,7 @@ i {
   -o-border-radius: 3px 0 0 3px;
   border-radius: 3px 0 0 3px;
 }
-/* line 127, ../sass/style.sass */
+/* line 144, ../sass/style.sass */
 .chrome #canvas .controls li:last-child {
   -webkit-border-radius: 0 3px 3px 0;
   -moz-border-radius: 0 3px 3px 0;
@@ -380,20 +372,20 @@ i {
   border-radius: 0 3px 3px 0;
 }
 
-/* line 130, ../sass/style.sass */
+/* line 147, ../sass/style.sass */
 .chrome .footer {
   text-align: center;
   color: #cccccc;
   font-size: 13px;
   text-shadow: black 0px 1px 1px;
 }
-/* line 131, ../sass/style.sass */
+/* line 148, ../sass/style.sass */
 .chrome .footer .inner {
   margin: 20px 0 0 0;
   padding: 10px;
 }
 
-/* line 138, ../sass/style.sass */
+/* line 155, ../sass/style.sass */
 .chrome #canvas .message {
   position: absolute;
   left: 50%;
@@ -402,22 +394,22 @@ i {
   top: 40px;
   text-align: center;
 }
-/* line 142, ../sass/style.sass */
+/* line 159, ../sass/style.sass */
 .chrome #canvas .message h2 {
   margin: 0 0 15px 0;
   color: white;
   font-size: 13px;
   text-shadow: black 0px 1px 1px;
 }
-/* line 146, ../sass/style.sass */
+/* line 163, ../sass/style.sass */
 .chrome #canvas .message i {
   margin: 0 auto 10px auto;
   width: 16px;
   height: 17px;
-  background-position: 0 -992px;
+  background: url(../img/icons/connected.png);
 }
 
-/* line 153, ../sass/style.sass */
+/* line 171, ../sass/style.sass */
 .button {
   display: -moz-inline-stack;
   display: inline-block;
@@ -441,7 +433,7 @@ i {
   -o-transition: all 300ms ease-in-out;
   transition: all 300ms ease-in-out;
 }
-/* line 162, ../sass/style.sass */
+/* line 180, ../sass/style.sass */
 .button:hover {
   -webkit-box-shadow: 0 0 10px 1px rgba(255, 255, 255, 0.5);
   -moz-box-shadow: 0 0 10px 1px rgba(255, 255, 255, 0.5);
@@ -450,14 +442,14 @@ i {
   /*filter:progid:DXImageTransform.Microsoft.Glow(Color = #33ffffff ,Strength = $opacity * 10); */
 }
 
-/* line 165, ../sass/style.sass */
+/* line 183, ../sass/style.sass */
 .beam {
   stroke: none;
   fill: white;
   opacity: 0.3;
 }
 
-/* line 170, ../sass/style.sass */
+/* line 188, ../sass/style.sass */
 .green_glow {
   stroke: 1;
   fill: #aad092;
@@ -465,7 +457,7 @@ i {
   z-index: 1000;
 }
 
-/* line 176, ../sass/style.sass */
+/* line 194, ../sass/style.sass */
 .green_glow_2 {
   stroke: 1;
   fill: #aad092;
@@ -473,7 +465,7 @@ i {
   z-index: 1000;
 }
 
-/* line 182, ../sass/style.sass */
+/* line 200, ../sass/style.sass */
 .dot_green {
   stroke: 1;
   fill: #aad092;
@@ -482,19 +474,19 @@ i {
   z-index: 1000;
 }
 
-/* line 190, ../sass/style.sass */
+/* line 208, ../sass/style.sass */
 circle {
   stroke: 1;
   fill: white;
 }
 
-/* line 194, ../sass/style.sass */
+/* line 212, ../sass/style.sass */
 #cities circle {
   fill: white;
   opacity: 0.7;
 }
 
-/* line 198, ../sass/style.sass */
+/* line 216, ../sass/style.sass */
 .red_glow {
   fill: none;
   stroke: #ff6666;
@@ -502,7 +494,7 @@ circle {
   z-index: 1000;
 }
 
-/* line 204, ../sass/style.sass */
+/* line 222, ../sass/style.sass */
 .hollow {
   stroke: #ff6666;
   stroke-width: 1.5;
@@ -510,13 +502,13 @@ circle {
   opacity: 0.9;
 }
 
-/* line 210, ../sass/style.sass */
+/* line 228, ../sass/style.sass */
 .glow {
   stroke: none;
   opacity: 0.1;
 }
 
-/* line 214, ../sass/style.sass */
+/* line 232, ../sass/style.sass */
 .states path {
   stroke: red;
   /*stroke:none; */
@@ -527,7 +519,7 @@ circle {
   /*opacity: 0; */
 }
 
-/* line 223, ../sass/style.sass */
+/* line 241, ../sass/style.sass */
 .parabola_light {
   fill: none;
   stroke: white;
@@ -535,7 +527,7 @@ circle {
   stroke-linecap: round;
 }
 
-/* line 229, ../sass/style.sass */
+/* line 247, ../sass/style.sass */
 .parabola {
   fill: none;
   stroke: white;
@@ -543,17 +535,22 @@ circle {
   stroke-linecap: round;
 }
 
-/* line 235, ../sass/style.sass */
+/* line 253, ../sass/style.sass */
 .radial-menu {
   display: none;
   position: absolute;
   width: 119px;
   height: 119px;
   /*pointer-events: none; */
-  background-position: 0 -839px;
+  background-color: rgba(255, 255, 255, 0.65);
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
   z-index: 5500;
 }
-/* line 242, ../sass/style.sass */
+/* line 262, ../sass/style.sass */
 .radial-menu .arm {
   width: 0px;
   height: 26px;
@@ -569,7 +566,7 @@ circle {
   text-align: right;
   width: 26px;
 }
-/* line 253, ../sass/style.sass */
+/* line 273, ../sass/style.sass */
 .radial-menu i {
   position: absolute;
   top: 0;
@@ -588,14 +585,14 @@ circle {
   border-radius: 100px;
 }
 
-/* line 264, ../sass/style.sass */
+/* line 284, ../sass/style.sass */
 .zoom {
   opacity: 1;
   width: 119px;
   height: 119px;
 }
 
-/* line 269, ../sass/style.sass */
+/* line 289, ../sass/style.sass */
 #canvas svg {
   display: inline-block;
   width: 100%;
